@@ -1,4 +1,4 @@
-# R36S Bluetooth Manager (dArkOs Edition)
+# R36S BT Manager
 
 A complete Bluetooth management solution for the R36S, originally by Jason and enhanced for dArkOs, providing a fully automated setup, system-level fixes, and an easy-to-use controller-friendly interface.
 
