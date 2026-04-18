@@ -21,6 +21,7 @@ It handles everything automatically:
 
 ## Features
 
+- B button now functions as back button
 - One-time automatic setup and dependency installation
 - Full Bluetooth control (enable / disable)
 - Scan and connect to nearby devices
