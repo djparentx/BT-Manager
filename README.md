@@ -21,6 +21,8 @@ It handles everything automatically:
 
 ## Features
 
+- Faster reconnect when enabling Bluetooth
+- Disable Bluetooth persists after reboot
 - B button now functions as back button
 - One-time automatic setup and dependency installation
 - Full Bluetooth control (enable / disable)
