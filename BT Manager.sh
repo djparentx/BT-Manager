@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #-------------------------------------#
-#          BT Manager 3.6.1           #
+#           BT Manager 3.8            #
 #            By djparent              #
 #             A fork of               #
 #         Bluetooth Manager           #
@@ -813,10 +813,6 @@ StopGPTKeyb() {
     fi
 }
 
-Cleanup() {
-    rm -f "$TMP_KEYS"
-}
-
 # -------------------------------------------------------
 # Font Selection
 # -------------------------------------------------------
@@ -916,6 +912,7 @@ ExitMenu() {
     printf "\033[H\033[2J" > "$CURR_TTY"
     printf "\e[?25h" > "$CURR_TTY"
     StopGPTKeyb
+	rm -f "$TMP_KEYS"
     if [[ ! -e "/dev/input/by-path/platform-odroidgo2-joypad-event-joystick" ]]; then
         [ -n "$ORIGINAL_FONT" ] && setfont "$ORIGINAL_FONT"
     fi
@@ -1472,33 +1469,36 @@ EnableBT() {
 	systemctl start bluetooth > /dev/null 2>&1 &
 	bluetoothctl power on > /dev/null 2>&1
 	
-	(
 	CheckPulse
-	sleep 1
 	bluetoothctl devices | awk '{print $2}' | while read -r mac; do
 		if bluetoothctl info "$mac" | grep -q "Paired: yes"; then
 			bluetoothctl connect "$mac" >/dev/null 2>&1 &
-			sleep 2
-			
 			if ! bluetoothctl info "$mac" | grep -q "Connected: yes"; then
 				bluetoothctl connect "$mac" >/dev/null 2>&1 &
 			fi
 		fi
 	done
-	sleep 2
 	ApplyAudioFix
-	) &
 }
 
+# -------------------------------------------------------
+# Disable Bluetooth
+# -------------------------------------------------------
+DisableBT() {
+	bluetoothctl power off > /dev/null 2>&1
+	systemctl stop bluetooth > /dev/null 2>&1
+	rfkill block bluetooth > /dev/null 2>&1
+	
+	ForceInternalAudio
+}
+	
 # -------------------------------------------------------
 # Toggle Bluetooth
 # -------------------------------------------------------
 ToggleBT() {
 	if GetPowerStatus; then
 		dialog --backtitle "$T_BACKTITLE" --title "$T_ACTION" --infobox "\n  $T_STOPPING" 5 35 > "$CURR_TTY"
-		bluetoothctl power off > /dev/null 2>&1
-		systemctl stop bluetooth > /dev/null 2>&1
-		ForceInternalAudio
+		DisableBT
 	else
 		dialog --backtitle "$T_BACKTITLE" --title "$T_ACTION" --infobox "\n  $T_POWERING" 5 35 > "$CURR_TTY"
 		EnableBT
@@ -2092,41 +2092,41 @@ UninstallerMenu() {
 # Main Menu
 # -------------------------------------------------------
 MainMenu() {
-  CheckDeps
-  EnsurePermissions
-  
-  while true; do
-	# Keep gptokeyb alive
-    if [[ -z $(pgrep -f gptokeyb) ]]; then
-        StartGPTKeyb
-    fi
-  
-    if GetPowerStatus; then
-        BT_STAT="\Z2$T_ON\Zn"; DEV_NAME="\Z4$(GetConnectedName)\Zn"
-		TOGGLE_LABEL="$T_DISABLE Bluetooth"
-    else
-        BT_STAT="\Z1$T_OFF\Zn"; DEV_NAME="$T_NONE"
-		TOGGLE_LABEL="$T_ENABLE Bluetooth"
-    fi
-    
-    mainselection=$(dialog --colors --backtitle "$T_BACKTITLE" --title "$T_MAIN_TITLE" --cancel-label "$T_EXIT" \
-    --menu "$T_STATUS: $BT_STAT\n$T_CONN_TO: $DEV_NAME" 14 45 6 \
-    1 "$TOGGLE_LABEL" \
-    2 "$T_M_SCAN" \
-    3 "$T_M_DISCONNECT" \
-    4 "$T_M_KNOWN" \
-    5 "$T_M_FORGET" \
-	6 "$T_MAIN_TITLE2" 2>&1 > "$CURR_TTY")
-        [ $? -ne 0 ] && ExitMenu
-    case $mainselection in
-        1) ToggleBT ;;
-        2) ScanAndConnect ;;
-        3) DisconnectProcess ;;
-        4) ListKnownAndConnect ;;
-        5) DeleteDevice ;;
-		6) UninstallerMenu ;;
-    esac
-  done
+	CheckDeps
+	EnsurePermissions
+
+	while true; do
+		# Keep gptokeyb alive
+		if [[ -z $(pgrep -f gptokeyb) ]]; then
+			StartGPTKeyb
+		fi
+	  
+		if GetPowerStatus; then
+			BT_STAT="\Z2$T_ON\Zn"; DEV_NAME="\Z4$(GetConnectedName)\Zn"
+			TOGGLE_LABEL="$T_DISABLE Bluetooth"
+		else
+			BT_STAT="\Z1$T_OFF\Zn"; DEV_NAME="$T_NONE"
+			TOGGLE_LABEL="$T_ENABLE Bluetooth"
+		fi
+		
+		mainselection=$(dialog --colors --backtitle "$T_BACKTITLE" --title "$T_MAIN_TITLE" --cancel-label "$T_EXIT" \
+		--menu "$T_STATUS: $BT_STAT\n$T_CONN_TO: $DEV_NAME" 14 45 6 \
+		1 "$TOGGLE_LABEL" \
+		2 "$T_M_SCAN" \
+		3 "$T_M_DISCONNECT" \
+		4 "$T_M_KNOWN" \
+		5 "$T_M_FORGET" \
+		6 "$T_MAIN_TITLE2" 2>&1 > "$CURR_TTY")
+			[ $? -ne 0 ] && ExitMenu
+		case $mainselection in
+			1) ToggleBT ;;
+			2) ScanAndConnect ;;
+			3) DisconnectProcess ;;
+			4) ListKnownAndConnect ;;
+			5) DeleteDevice ;;
+			6) UninstallerMenu ;;
+		esac
+	done
 }
 
 # -------------------------------------------------------
@@ -2143,7 +2143,7 @@ StartGPTKeyb
 
 printf "\033[H\033[2J" > "$CURR_TTY"
 dialog --clear
-trap 'StopGPTKeyb; Cleanup; ExitMenu' EXIT
+trap ExitMenu EXIT
 
 
 MainMenu
