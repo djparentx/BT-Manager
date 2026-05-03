@@ -140,6 +140,6 @@ The script makes persistent system modifications:
 ## Credits
 
 - Original script by Jason_3x 
-- dArkOs Edition modifications and enhancements by djparent  
+- ArkOs Edition modifications and enhancements by djparent  
 
 ---
