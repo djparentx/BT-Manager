@@ -1,4 +1,4 @@
-# R36S BT Manager (ArkOS / dArkOS/RE)
+# R36S Bluetooth Manager
 
 v4.0 by djparent
 
