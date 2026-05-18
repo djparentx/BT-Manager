@@ -60,10 +60,6 @@ export XDG_RUNTIME_DIR=/run/user/${ARK_UID}
 export PULSE_SERVER=unix:$XDG_RUNTIME_DIR/pulse/native
 export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
 
-LOG_FILE="$(dirname "$0")/bt_manager_debug.log"
-exec > "$LOG_FILE" 2>&1
-set -x
-
 if [ -f "$ES_CONF" ]; then
     ES_DETECTED=$(grep "name=\"Language\"" "$ES_CONF" | grep -o 'value="[^"]*"' | cut -d '"' -f 2)
     [ -n "$ES_DETECTED" ] && SYSTEM_LANG="$ES_DETECTED"
