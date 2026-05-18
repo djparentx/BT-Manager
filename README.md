@@ -1,6 +1,6 @@
 # R36S BT Manager (ArkOS / dArkOS/RE)
 
-v3.8 by djparent
+v4.0 by djparent
 
 A complete Bluetooth management solution for the R36S, originally for dArkOS by Jason_3x and now enhanced for use on ArkOS or dArkOs, providing a fully automated setup, system-level fixes, and an easy-to-use controller-friendly interface.
 
@@ -21,6 +21,7 @@ It handles everything automatically:
 
 ## Features
 
+- Device battery percentage displayed in main menu
 - Faster reconnect when enabling Bluetooth
 - Disable Bluetooth persists after reboot
 - B button now functions as back button
@@ -81,7 +82,8 @@ The main menu provides:
 - Scan and Connect  
 - Disconnect a Device  
 - Known Devices  
-- Forget a Device  
+- Forget a Device
+- Device Information 
 - Quit  
 
 Navigation works with the R36S controls.
