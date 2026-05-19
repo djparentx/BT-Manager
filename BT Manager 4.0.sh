@@ -1,4 +1,5 @@
 #!/bin/bash
+VERSION="4.0"
 
 # =======================================================
 #        	BT Manager 4.0 for ArkOS and dArkOS
@@ -67,7 +68,7 @@ fi
 # -------------------------------------------------------
 # Default configuration : EN
 # -------------------------------------------------------
-T_BACKTITLE="BT Manager by djparent"
+T_BACKTITLE="BT Manager ${VERSION} by djparent"
 T_STARTING="Starting BT Manager. \nPlease wait..."
 T_ERR_TITLE="Error"
 T_STOPPING="Stopping Bluetooth..."
@@ -168,10 +169,12 @@ T_FORGOTTEN_MSG="\nAll paired devices have been removed."
 T_RESCAN="Rescan"
 T_DEP_MSG="Installation required. Install now?"
 T_DEV_INFO="Device Information"
+T_UPDATE_AVAILABLE="Update Available"
+T_DOWNLOAD="Download Update Now?"
 
 # --- FRANÇAIS (FR) --- 
 if [[ "$SYSTEM_LANG" == *"fr"* ]]; then
-T_BACKTITLE="BT Manager par djparent"
+T_BACKTITLE="BT Manager ${VERSION} par djparent"
 T_STARTING="Demarrage du BT Manager. \nVeuillez patienter..."
 T_ERR_TITLE="Erreur"
 T_STOPPING="Arret du Bluetooth..."
@@ -271,10 +274,12 @@ T_FORGOTTEN_MSG="\nTous les appareils associes ont ete supprimes."
 T_RESCAN="Relancer"
 T_DEP_MSG="Installation requise. Installer maintenant ?"
 T_DEV_INFO="Informations sur l appareil"
+T_UPDATE_AVAILABLE="Mise a jour disponible"
+T_DOWNLOAD="Telecharger la mise a jour maintenant ?"
 
 # --- ESPAÑOL (ES) ---
 elif [[ "$SYSTEM_LANG" == *"es"* ]]; then
-T_BACKTITLE="BT Manager por djparent"
+T_BACKTITLE="BT Manager ${VERSION} por djparent"
 T_STARTING="Iniciando BT Manager. \nPor favor espere..."
 T_ERR_TITLE="Error"
 T_STOPPING="Deteniendo Bluetooth..."
@@ -374,10 +379,12 @@ T_FORGOTTEN_MSG="\nTodos los dispositivos emparejados han sido eliminados."
 T_RESCAN="Reescanear"
 T_DEP_MSG="Instalacion requerida. Instalar ahora?"
 T_DEV_INFO="Informacion del dispositivo"
+T_UPDATE_AVAILABLE="Actualizacion disponible"
+T_DOWNLOAD="Descargar actualizacion ahora?"
 
 # --- PORTUGUÊS (PT) ---
 elif [[ "$SYSTEM_LANG" == *"pt"* ]]; then
-T_BACKTITLE="BT Manager por djparent"
+T_BACKTITLE="BT Manager ${VERSION} por djparent"
 T_STARTING="Iniciando BT Manager. \nPor favor aguarde..."
 T_ERR_TITLE="Erro"
 T_STOPPING="Parando Bluetooth..."
@@ -477,10 +484,12 @@ T_FORGOTTEN_MSG="\nTodos os dispositivos emparelhados foram removidos."
 T_RESCAN="Reescanear"
 T_DEP_MSG="Instalacao necessaria. Instalar agora?"
 T_DEV_INFO="Informacoes do dispositivo"
+T_UPDATE_AVAILABLE="Atualizacao disponivel"
+T_DOWNLOAD="Baixar atualizacao agora?"
 
 # --- ITALIANO (IT) ---
 elif [[ "$SYSTEM_LANG" == *"it"* ]]; then
-T_BACKTITLE="BT Manager di djparent"
+T_BACKTITLE="BT Manager ${VERSION} di djparent"
 T_STARTING="Avvio di BT Manager. \nAttendere prego..."
 T_ERR_TITLE="Errore"
 T_STOPPING="Arresto Bluetooth..."
@@ -579,10 +588,12 @@ T_FORGOTTEN_MSG="\nTutti i dispositivi associati sono stati rimossi."
 T_RESCAN="Ripeti scansione"
 T_DEP_MSG="Installazione richiesta. Installare ora?"
 T_DEV_INFO="Informazioni dispositivo"
+T_UPDATE_AVAILABLE="Aggiornamento disponibile"
+T_DOWNLOAD="Scaricare aggiornamento ora?"
 
 # --- DEUTSCH (DE) ---
 elif [[ "$SYSTEM_LANG" == *"de"* ]]; then
-T_BACKTITLE="BT Manager von djparent"
+T_BACKTITLE="BT Manager ${VERSION} von djparent"
 T_STARTING="BT Manager wird gestartet. \nBitte warten..."
 T_ERR_TITLE="Fehler"
 T_STOPPING="Bluetooth wird gestoppt..."
@@ -682,10 +693,12 @@ T_FORGOTTEN_MSG="\nAlle gekoppelten Geraete wurden entfernt."
 T_RESCAN="Erneut suchen"
 T_DEP_MSG="Installation erforderlich. Jetzt installieren?"
 T_DEV_INFO="Geraeteinformationen"
+T_UPDATE_AVAILABLE="Update verfuegbar"
+T_DOWNLOAD="Update jetzt herunterladen?"
 
 # --- POLSKI (PL) ---
 elif [[ "$SYSTEM_LANG" == *"pl"* ]]; then
-T_BACKTITLE="BT Manager przez djparent"
+T_BACKTITLE="BT Manager ${VERSION} przez djparent"
 T_STARTING="Uruchamianie BT Manager. \nProsze czekac..."
 T_ERR_TITLE="Blad"
 T_STOPPING="Zatrzymywanie Bluetooth..."
@@ -785,7 +798,38 @@ T_FORGOTTEN_MSG="\nWszystkie sparowane urzadzenia zostaly usuniete."
 T_RESCAN="Skanuj ponownie"
 T_DEP_MSG="Wymagana instalacja. Zainstalowac teraz?"
 T_DEV_INFO="Informacje o urzadzeniu"
+T_UPDATE_AVAILABLE="Dostepna aktualizacja"
+T_DOWNLOAD="Pobrac aktualizacje teraz?"
 fi
+
+# -------------------------------------------------------
+# Check for Updates
+# -------------------------------------------------------
+Self_Update() {
+    local repo="djparentx/BT-Manager"
+    local latest url
+
+    read -r latest url < <(curl -s https://api.github.com/repos/${repo}/releases/latest \
+    | python3 -c "import sys,json; d=json.load(sys.stdin); print(d['tag_name'].lstrip('v'), d['assets'][0]['browser_download_url'])")
+
+    [[ -z "$latest" ]] && return  # no internet / API fail, skip silently
+
+    if [[ "$latest" != "$VERSION" ]]; then
+		dialog \
+			--clear \
+			--backtitle "$T_BACKTITLE" \
+			--title "$latest $T_UPDATE_AVAILABLE" \
+			--yesno "\n  $T_DOWNLOAD" \
+			7 45 > "$CURR_TTY" 2>&1
+			
+		if [[ $? != 0 ]]; then
+			return
+		fi
+
+        curl -L "$url" -o "$0" && chmod +x "$0"
+        exec "$0"  # relaunch updated script
+    fi
+}
 
 # -------------------------------------------------------
 # Start gamepad input
@@ -2405,6 +2449,8 @@ Start_GPTKeyb
 printf "\033[H\033[2J" > "$CURR_TTY"
 dialog --clear
 trap Exit_Menu EXIT
+
+Self_Update
 
 # --- Set initial bt_manager_state ---
 if Get_Power_Status; then
