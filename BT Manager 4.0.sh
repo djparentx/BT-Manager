@@ -826,8 +826,10 @@ Self_Update() {
 			return
 		fi
 
-        curl -L "$url" -o "$0" && chmod +x "$0"
-        exec "$0"  # relaunch updated script
+		local new_path="${0%/*}/BT Manager ${latest}.sh"
+		curl -L "$url" -o "$new_path" && chmod +x "$new_path"
+		[[ "$0" != "$new_path" ]] && rm -f "$0"
+		exec "$new_path"
     fi
 }
 
