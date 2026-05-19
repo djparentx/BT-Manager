@@ -21,6 +21,7 @@ It handles everything automatically:
 
 ## Features
 
+- Self-updates to latest GithHub release
 - Device battery percentage displayed in main menu
 - Faster reconnect when enabling Bluetooth
 - Disable Bluetooth persists after reboot
