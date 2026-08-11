@@ -1,9 +1,9 @@
-[<img width="300" height="150" alt="ChatGPT Image Aug 11, 2026, 10_52_38 AM" src="https://github.com/user-attachments/assets/8680b713-26ad-4d3a-90ea-da1b27a0fe93" />](https://ko-fi.com/O8Z424G15Y)
-
 # R36S Bluetooth Manager
 
 
 A complete Bluetooth management solution for the R36S, originally for dArkOS by Jason_3x and now enhanced for use on ArkOS or dArkOs, providing a fully automated setup, system-level fixes, and an easy-to-use controller-friendly interface.
+
+[<img width="300" height="150" alt="ChatGPT Image Aug 11, 2026, 10_52_38 AM" src="https://github.com/user-attachments/assets/8680b713-26ad-4d3a-90ea-da1b27a0fe93" />](https://ko-fi.com/O8Z424G15Y)
 
 ---
 
