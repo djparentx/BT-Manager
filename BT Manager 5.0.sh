@@ -1146,7 +1146,11 @@ done
 EV="/dev/input/event3"
 [ ! -e "\$EV" ] && EV="/dev/input/\$(grep -E 'Handlers|Name' /proc/bus/input/devices | grep -A1 "odroidgo3-keys" | grep -oE 'event[0-9]+' | head -n1)"
 
-CUR_VOL=60
+MAX_VOL=\$(amixer -c 0 sget Playback 2>/dev/null | awk '/Limits:/{print \$NF; exit}')
+[[ "\$MAX_VOL" =~ ^[0-9]+\$ ]] && [ "\$MAX_VOL" -gt 0 ] || MAX_VOL=100
+STEP_VOL=\$(( (MAX_VOL + 99) / 100 ))
+CUR_VOL=\$(( MAX_VOL * 60 / 100 ))
+LAST_PCT=60
 BT_SINK=""
 
 refresh_sink() {
@@ -1156,16 +1160,23 @@ refresh_sink() {
 sync_vol() {
     [ -z "\$BT_SINK" ] && return
     local V=\$(\$PA list sinks 2>/dev/null | awk "/Name: \$BT_SINK/{found=1} found && /Volume:/ && !/Base/{match(\\\$0,/[0-9]+%/); print substr(\\\$0,RSTART,RLENGTH-1); exit}")
-    [ -n "\$V" ] && CUR_VOL=\$V
+    if [ -n "\$V" ]; then
+        local D=\$(( V - LAST_PCT ))
+        if [ "\${D#-}" -gt 1 ]; then
+            CUR_VOL=\$(( V * MAX_VOL / 100 ))
+            LAST_PCT=\$V
+        fi
+    fi
 }
 
 setvol() {
     local DIR=\$1
     [ -z "\$BT_SINK" ] && return
-    CUR_VOL=\$(( DIR > 0 ? CUR_VOL + 1 : CUR_VOL - 1 ))
-    [ "\$CUR_VOL" -gt 100 ] && CUR_VOL=100
+    CUR_VOL=\$(( DIR > 0 ? CUR_VOL + STEP_VOL : CUR_VOL - STEP_VOL ))
+    [ "\$CUR_VOL" -gt "\$MAX_VOL" ] && CUR_VOL=\$MAX_VOL
     [ "\$CUR_VOL" -lt 0 ] && CUR_VOL=0
-    \$PA set-sink-volume "\$BT_SINK" \${CUR_VOL}% >/dev/null 2>&1
+    LAST_PCT=\$(( (CUR_VOL * 100 + MAX_VOL / 2) / MAX_VOL ))
+    \$PA set-sink-volume "\$BT_SINK" \${LAST_PCT}% >/dev/null 2>&1
     if [ "\$CUR_VOL" -eq 0 ]; then
         \$PA set-sink-mute "\$BT_SINK" 1 >/dev/null 2>&1
     else
