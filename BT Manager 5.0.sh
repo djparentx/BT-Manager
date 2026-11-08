@@ -64,9 +64,6 @@ export XDG_RUNTIME_DIR=/run/user/${ARK_UID}
 export PULSE_SERVER=unix:$XDG_RUNTIME_DIR/pulse/native
 export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
 
-# LOG_FILE="$(dirname "$0")/bt_manager_debug.log"
-# exec > "$LOG_FILE" 2>&1
-# set -x
 
 if [ -f "$ES_CONF" ]; then
     ES_DETECTED=$(grep "name=\"Language\"" "$ES_CONF" | grep -o 'value="[^"]*"' | cut -d '"' -f 2)
@@ -78,9 +75,6 @@ fi
 T_BACKTITLE="BT Manager ${VERSION} by djparent"
 T_WAIT
 T_STARTING="Starting BT Manager. \nPlease wait..."
-T_ERR_TITLE="Error"
-T_STOPPING="Stopping Bluetooth..."
-T_STARTING_BT="Starting Bluetooth..."
 T_ACTION="Action"
 T_BT_DISABLED="Bluetooth disabled.\n\n  Enable it first."
 T_SCAN_TITLE="Scanning"
@@ -104,7 +98,6 @@ T_DELETE_TITLE="Delete"
 T_CHOOSE_DEL="Choose device to forget:"
 T_FORGOTTEN="Device forgotten."
 T_MAIN_TITLE="Main Menu"
-T_QUIT="Quit"
 T_STATUS="BT Status"
 T_CONN_TO="Connected to"
 T_NONE="None"
@@ -113,7 +106,6 @@ T_DISABLE="Disable"
 T_M_SCAN="Scan and Connect"
 T_M_KNOWN="Known Devices"
 T_M_FORGET="Forget a Device"
-T_M_QUIT="Quit"
 T_FIXING_AUDIO="Fixing audio protocols..."
 T_PAIRING="Pairing in progress..."
 T_INTERNET="Internet Required"
@@ -158,13 +150,12 @@ T_STEP6_MSG="\nRestoring RetroArch audio driver..."
 T_STEP7_TITLE="Step 7/7"
 T_STEP7_MSG="\nReloading systemd daemon..."
 T_PKG_TITLE="Remove Packages?"
-T_PKG_MSG="The installer may have installed:\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nWARNING: May be used by other software.\n\nRemove them now?"
+T_PKG_MSG="The installer may have installed:\n  - bluez\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - libasound2-plugins, rtkit\n\nWARNING: May be used by other software.\n\nRemove them now?"
 T_REMOVING_TITLE="Removing Packages"
 T_REMOVING_MSG="\nRemoving packages..."
 T_DONE_TITLE="Uninstall Complete"
 T_OPT_MSG="\n - installed packages removed"
 T_DONE_MSG="What was undone:\n\n - installed services removed%PKG%\n - device audio drivers restored\n - install flag removed\n\nA reboot is required to restore volume function."
-T_REBOOT="Reboot?"
 T_REBOOT_MSG="Reboot now to apply all changes?"
 T_REBOOTING="Rebooting"
 T_FORGET_MENU="Forget All Devices"
@@ -179,21 +170,12 @@ T_DEP_MSG="Installation required. Install now?"
 T_DEV_INFO="Device Information"
 T_UPDATE_AVAILABLE="Update Available"
 T_DOWNLOAD="Download Update Now?"
-T_DISABLED="Disabled"
-T_SERVICES="Services"
-T_SERVICES_DISABLED="Services are disabled.\n\n  Enable them first."
-T_SERVICES_ENABLED="Services Enabled"
-T_SERV_MSG="A reboot may be necessary to restore functions."
-T_SERV_START="Starting Services..."
 T_DRIVERS="Installing drivers..."
 
 # --- FRANÇAIS (FR) --- 
 if [[ "$SYSTEM_LANG" == *"fr"* ]]; then
 T_BACKTITLE="BT Manager ${VERSION} par djparent"
 T_STARTING="Demarrage du BT Manager. \nVeuillez patienter..."
-T_ERR_TITLE="Erreur"
-T_STOPPING="Arret du Bluetooth..."
-T_STARTING_BT="Demarrage du Bluetooth..."
 T_ACTION="Action"
 T_BT_DISABLED="Bluetooth desactive.\n\n  Activez-le d'abord."
 T_SCAN_TITLE="Recherche"
@@ -217,7 +199,6 @@ T_DELETE_TITLE="Supprimer"
 T_CHOOSE_DEL="Choisissez l'appareil a oublier :"
 T_FORGOTTEN="Appareil oublie."
 T_MAIN_TITLE="Menu Principal"
-T_QUIT="Quitter"
 T_STATUS="Statut BT"
 T_CONN_TO="Connecte a"
 T_NONE="Aucun"
@@ -226,7 +207,6 @@ T_DISABLE="Desactiver"
 T_M_SCAN="Rechercher et Connecter"
 T_M_KNOWN="Appareils connus"
 T_M_FORGET="Oublier un appareil"
-T_M_QUIT="Quitter"
 T_FIXING_AUDIO="Reparation des protocoles audio..."
 T_PAIRING="Appairage en cours..."
 T_INTERNET="Internet requis"
@@ -271,12 +251,11 @@ T_STEP6_MSG="\nRestauration du pilote audio RetroArch..."
 T_STEP7_TITLE="Etape 7/7"
 T_STEP7_MSG="\nRechargement du daemon systemd..."
 T_PKG_TITLE="Supprimer les paquets ?"
-T_PKG_MSG="L'installateur a peut-etre installe :\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nATTENTION : Peuvent etre utilises par d'autres logiciels.\n\nLes supprimer maintenant ?"
+T_PKG_MSG="L'installateur a peut-etre installe :\n  - bluez\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - libasound2-plugins, rtkit\n\nATTENTION : Peuvent etre utilises par d'autres logiciels.\n\nLes supprimer maintenant ?"
 T_REMOVING_TITLE="Suppression des paquets"
 T_REMOVING_MSG="\nSuppression des paquets..."
 T_DONE_TITLE="Desinstallation terminee"
 T_DONE_MSG="Ce qui a ete annule :\n\n - Services installes supprimes%PKG%\n - Pilotes audio restaures\n - Indicateur d'installation supprime\n\nUn redemarrage est requis pour restaurer le volume."
-T_REBOOT="Redemarrer ?"
 T_REBOOT_MSG="Redemarrer maintenant pour appliquer les changements ?"
 T_REBOOTING="Redemarrage"
 T_FORGET_MENU="Oublier tous les appareils"
@@ -291,20 +270,11 @@ T_DEP_MSG="Installation requise. Installer maintenant ?"
 T_DEV_INFO="Informations sur l appareil"
 T_UPDATE_AVAILABLE="Mise a jour disponible"
 T_DOWNLOAD="Telecharger la mise a jour maintenant ?"
-T_DISABLED="Desactive"
-T_SERVICES="Services"
-T_SERVICES_DISABLED="Les services sont desactives.\n\n  Activez les d abord."
-T_SERVICES_ENABLED="Services actives"
-T_SERV_MSG="Un redemarrage peut etre necessaire pour restaurer les fonctions."
-T_SERV_START="Demarrage des services..."
 
 # --- ESPAÑOL (ES) ---
 elif [[ "$SYSTEM_LANG" == *"es"* ]]; then
 T_BACKTITLE="BT Manager ${VERSION} por djparent"
 T_STARTING="Iniciando BT Manager. \nPor favor espere..."
-T_ERR_TITLE="Error"
-T_STOPPING="Deteniendo Bluetooth..."
-T_STARTING_BT="Iniciando Bluetooth..."
 T_ACTION="Accion"
 T_BT_DISABLED="Bluetooth desactivado.\n\n  Activelo primero."
 T_SCAN_TITLE="Escaneo"
@@ -328,7 +298,6 @@ T_DELETE_TITLE="Eliminar"
 T_CHOOSE_DEL="Elija el dispositivo a olvidar:"
 T_FORGOTTEN="Dispositivo olvidado."
 T_MAIN_TITLE="Menu Principal"
-T_QUIT="Salir"
 T_STATUS="Estado de BT"
 T_CONN_TO="Conectado a"
 T_NONE="Ninguno"
@@ -337,7 +306,6 @@ T_DISABLE="Desactivar"
 T_M_SCAN="Escanear y Conectar"
 T_M_KNOWN="Dispositivos conocidos"
 T_M_FORGET="Olvidar un dispositivo"
-T_M_QUIT="Salir"
 T_FIXING_AUDIO="Reparando protocolos de audio..."
 T_PAIRING="Emparejamiento en curso..."
 T_INTERNET="Internet requerido"
@@ -382,12 +350,11 @@ T_STEP6_MSG="\nRestaurando controlador de audio RetroArch..."
 T_STEP7_TITLE="Paso 7/7"
 T_STEP7_MSG="\nRecargando daemon de systemd..."
 T_PKG_TITLE="Eliminar Paquetes ?"
-T_PKG_MSG="El instalador puede haber instalado :\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nADVERTENCIA : Pueden ser usados por otro software.\n\nEliminarlos ahora ?"
+T_PKG_MSG="El instalador puede haber instalado :\n  - bluez\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - libasound2-plugins, rtkit\n\nADVERTENCIA : Pueden ser usados por otro software.\n\nEliminarlos ahora ?"
 T_REMOVING_TITLE="Eliminando Paquetes"
 T_REMOVING_MSG="\nEliminando paquetes..."
 T_DONE_TITLE="Desinstalacion Completa"
 T_DONE_MSG="Lo que fue deshecho :\n\n - Servicios instalados eliminados%PKG%\n - Controladores de audio restaurados\n - Indicador de instalacion eliminado\n\nSe requiere reinicio para restaurar el volumen."
-T_REBOOT="Reiniciar ?"
 T_REBOOT_MSG="Reiniciar ahora para aplicar todos los cambios ?"
 T_REBOOTING="Reiniciando"
 T_FORGET_MENU="Olvidar todos los dispositivos"
@@ -402,20 +369,11 @@ T_DEP_MSG="Instalacion requerida. Instalar ahora?"
 T_DEV_INFO="Informacion del dispositivo"
 T_UPDATE_AVAILABLE="Actualizacion disponible"
 T_DOWNLOAD="Descargar actualizacion ahora?"
-T_DISABLED="Desactivado"
-T_SERVICES="Servicios"
-T_SERVICES_DISABLED="Los servicios estan desactivados.\n\n  Activelos primero."
-T_SERVICES_ENABLED="Servicios activados"
-T_SERV_MSG="Puede ser necesario reiniciar para restaurar las funciones."
-T_SERV_START="Iniciando servicios..."
 
 # --- PORTUGUÊS (PT) ---
 elif [[ "$SYSTEM_LANG" == *"pt"* ]]; then
 T_BACKTITLE="BT Manager ${VERSION} por djparent"
 T_STARTING="Iniciando BT Manager. \nPor favor aguarde..."
-T_ERR_TITLE="Erro"
-T_STOPPING="Parando Bluetooth..."
-T_STARTING_BT="Iniciando Bluetooth..."
 T_ACTION="Acao"
 T_BT_DISABLED="Bluetooth desativado.\n\n  Ative-o primeiro."
 T_SCAN_TITLE="Escaneando"
@@ -439,7 +397,6 @@ T_DELETE_TITLE="Deletar"
 T_CHOOSE_DEL="Escolha o dispositivo para esquecer:"
 T_FORGOTTEN="Dispositivo esquecido."
 T_MAIN_TITLE="Menu Principal"
-T_QUIT="Sair"
 T_STATUS="Status do BT"
 T_CONN_TO="Conectado a"
 T_NONE="Nenhum"
@@ -448,7 +405,6 @@ T_DISABLE="Desativar"
 T_M_SCAN="Escanear e Conectar"
 T_M_KNOWN="Dispositivos Conhecidos"
 T_M_FORGET="Esquecer um Dispositivo"
-T_M_QUIT="Sair"
 T_FIXING_AUDIO="Corrigindo protocolos de audio..."
 T_PAIRING="Pareamento em curso..."
 T_INTERNET="Internet necessaria"
@@ -493,12 +449,11 @@ T_STEP6_MSG="\nRestaurando driver de audio do RetroArch..."
 T_STEP7_TITLE="Passo 7/7"
 T_STEP7_MSG="\nRecarregando daemon do systemd..."
 T_PKG_TITLE="Remover Pacotes ?"
-T_PKG_MSG="O instalador pode ter instalado :\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nAVISO : Podem ser usados por outros programas.\n\nRemove-los agora ?"
+T_PKG_MSG="O instalador pode ter instalado :\n  - bluez\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - libasound2-plugins, rtkit\n\nAVISO : Podem ser usados por outros programas.\n\nRemove-los agora ?"
 T_REMOVING_TITLE="Removendo Pacotes"
 T_REMOVING_MSG="\nRemovendo pacotes..."
 T_DONE_TITLE="Desinstalacao Concluida"
 T_DONE_MSG="O que foi desfeito :\n\n - Servicos instalados removidos%PKG%\n - Controladores de audio restaurados\n - Indicador de instalacao removido\n\nE necessario reiniciar para restaurar o volume."
-T_REBOOT="Reiniciar ?"
 T_REBOOT_MSG="Reiniciar agora para aplicar todas as alteracoes ?"
 T_REBOOTING="Reiniciando"
 T_FORGET_MENU="Esquecer todos os dispositivos"
@@ -513,20 +468,11 @@ T_DEP_MSG="Instalacao necessaria. Instalar agora?"
 T_DEV_INFO="Informacoes do dispositivo"
 T_UPDATE_AVAILABLE="Atualizacao disponivel"
 T_DOWNLOAD="Baixar atualizacao agora?"
-T_DISABLED="Desativado"
-T_SERVICES="Servicos"
-T_SERVICES_DISABLED="Os servicos estao desativados.\n\n  Ative-os primeiro."
-T_SERVICES_ENABLED="Servicos ativados"
-T_SERV_MSG="Pode ser necessario reiniciar para restaurar as funcoes."
-T_SERV_START="Iniciando servicos..."
 
 # --- ITALIANO (IT) ---
 elif [[ "$SYSTEM_LANG" == *"it"* ]]; then
 T_BACKTITLE="BT Manager ${VERSION} di djparent"
 T_STARTING="Avvio di BT Manager. \nAttendere prego..."
-T_ERR_TITLE="Errore"
-T_STOPPING="Arresto Bluetooth..."
-T_STARTING_BT="Avvio Bluetooth..."
 T_ACTION="Azione"
 T_BT_DISABLED="Bluetooth disattivato.\n\n  Attivarlo prima."
 T_SCAN_TITLE="Scansione"
@@ -550,7 +496,6 @@ T_DELETE_TITLE="Elimina"
 T_CHOOSE_DEL="Scegli dispositivo da dimenticare:"
 T_FORGOTTEN="Dispositivo dimenticato."
 T_MAIN_TITLE="Menu Principale"
-T_QUIT="Esci"
 T_STATUS="Stato BT"
 T_CONN_TO="Connesso a"
 T_NONE="Nessuno"
@@ -559,7 +504,6 @@ T_DISABLE="Disattiva"
 T_M_SCAN="Scansiona e Connetti"
 T_M_KNOWN="Dispositivi Noti"
 T_M_FORGET="Dimentica un Dispositivo"
-T_M_QUIT="Esci"
 T_FIXING_AUDIO="Correzione protocolli audio..."
 T_PAIRING="Accoppiamento in corso..."
 T_INTERNET="Internet richiesto"
@@ -603,12 +547,11 @@ T_STEP6_MSG="\nRipristino del driver audio RetroArch..."
 T_STEP7_TITLE="Passo 7/7"
 T_STEP7_MSG="\nRicaricamento del daemon di systemd..."
 T_PKG_TITLE="Rimuovere i Pacchetti ?"
-T_PKG_MSG="Il programma di installazione potrebbe aver installato :\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nATTENZIONE : Potrebbero essere usati da altri software.\n\nRimuoverli ora ?"
+T_PKG_MSG="Il programma di installazione potrebbe aver installato :\n  - bluez\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - libasound2-plugins, rtkit\n\nATTENZIONE : Potrebbero essere usati da altri software.\n\nRimuoverli ora ?"
 T_REMOVING_TITLE="Rimozione Pacchetti"
 T_REMOVING_MSG="\nRimozione dei pacchetti..."
 T_DONE_TITLE="Disinstallazione Completata"
 T_DONE_MSG="Cosa e stato annullato :\n\n - Servizi installati rimossi%PKG%\n - Driver audio ripristinati\n - Indicatore di installazione rimosso\n\nE necessario riavviare per ripristinare il volume."
-T_REBOOT="Riavviare ?"
 T_REBOOT_MSG="Riavviare ora per applicare tutte le modifiche ?"
 T_REBOOTING="Riavvio"
 T_FORGET_MENU="Dimentica tutti i dispositivi"
@@ -623,20 +566,11 @@ T_DEP_MSG="Installazione richiesta. Installare ora?"
 T_DEV_INFO="Informazioni dispositivo"
 T_UPDATE_AVAILABLE="Aggiornamento disponibile"
 T_DOWNLOAD="Scaricare aggiornamento ora?"
-T_DISABLED="Disabilitato"
-T_SERVICES="Servizi"
-T_SERVICES_DISABLED="I servizi sono disabilitati.\n\n  Abilitali prima."
-T_SERVICES_ENABLED="Servizi abilitati"
-T_SERV_MSG="Potrebbe essere necessario riavviare per ripristinare le funzioni."
-T_SERV_START="Avvio servizi..."
 
 # --- DEUTSCH (DE) ---
 elif [[ "$SYSTEM_LANG" == *"de"* ]]; then
 T_BACKTITLE="BT Manager ${VERSION} von djparent"
 T_STARTING="BT Manager wird gestartet. \nBitte warten..."
-T_ERR_TITLE="Fehler"
-T_STOPPING="Bluetooth wird gestoppt..."
-T_STARTING_BT="Bluetooth wird gestartet..."
 T_ACTION="Aktion"
 T_BT_DISABLED="Bluetooth deaktiviert.\n\n  Bitte zuerst aktivieren."
 T_SCAN_TITLE="Suche"
@@ -660,7 +594,6 @@ T_DELETE_TITLE="Loeschen"
 T_CHOOSE_DEL="Geraet zum Vergessen auswaehlen:"
 T_FORGOTTEN="Geraet vergessen."
 T_MAIN_TITLE="Hauptmenue"
-T_QUIT="Beenden"
 T_STATUS="BT-Status"
 T_CONN_TO="Verbunden mit"
 T_NONE="Keine"
@@ -669,7 +602,6 @@ T_DISABLE="Deaktivieren"
 T_M_SCAN="Suchen und verbinden"
 T_M_KNOWN="Bekannte Geraete"
 T_M_FORGET="Geraet vergessen"
-T_M_QUIT="Beenden"
 T_FIXING_AUDIO="Audioprotokolle werden korrigiert..."
 T_PAIRING="Kopplung laeuft..."
 T_INTERNET="Internetverbindung erforderlich"
@@ -714,12 +646,11 @@ T_STEP6_MSG="\nRetroArch-Audiotreiber wird wiederhergestellt..."
 T_STEP7_TITLE="Schritt 7/7"
 T_STEP7_MSG="\nSystemd-Daemon wird neu geladen..."
 T_PKG_TITLE="Pakete entfernen?"
-T_PKG_MSG="Der Installer hat moeglicherweise folgendes installiert:\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nWARNUNG: Moeglicherweise von anderer Software genutzt.\n\nJetzt entfernen?"
+T_PKG_MSG="Der Installer hat moeglicherweise folgendes installiert:\n  - bluez\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - libasound2-plugins, rtkit\n\nWARNUNG: Moeglicherweise von anderer Software genutzt.\n\nJetzt entfernen?"
 T_REMOVING_TITLE="Pakete werden entfernt"
 T_REMOVING_MSG="\nPakete werden entfernt..."
 T_DONE_TITLE="Deinstallation abgeschlossen"
 T_DONE_MSG="Was rueckgaengig gemacht wurde:\n\n - installierte Dienste entfernt%PKG%\n - Geraeteaudiotreiber wiederhergestellt\n - Installationskennzeichen entfernt\n\nEin Neustart ist erforderlich, um die Lautstaerkefunktion wiederherzustellen."
-T_REBOOT="Neu starten?"
 T_REBOOT_MSG="Jetzt neu starten, um alle Aenderungen anzuwenden?"
 T_REBOOTING="Neustart"
 T_FORGET_MENU="Alle Geraete vergessen"
@@ -734,20 +665,11 @@ T_DEP_MSG="Installation erforderlich. Jetzt installieren?"
 T_DEV_INFO="Geraeteinformationen"
 T_UPDATE_AVAILABLE="Update verfuegbar"
 T_DOWNLOAD="Update jetzt herunterladen?"
-T_DISABLED="Deaktiviert"
-T_SERVICES="Dienste"
-T_SERVICES_DISABLED="Dienste sind deaktiviert.\n\n  Bitte zuerst aktivieren."
-T_SERVICES_ENABLED="Dienste aktiviert"
-T_SERV_MSG="Ein Neustart kann erforderlich sein, um Funktionen wiederherzustellen."
-T_SERV_START="Dienste werden gestartet..."
 
 # --- POLSKI (PL) ---
 elif [[ "$SYSTEM_LANG" == *"pl"* ]]; then
 T_BACKTITLE="BT Manager ${VERSION} przez djparent"
 T_STARTING="Uruchamianie BT Manager. \nProsze czekac..."
-T_ERR_TITLE="Blad"
-T_STOPPING="Zatrzymywanie Bluetooth..."
-T_STARTING_BT="Uruchamianie Bluetooth..."
 T_ACTION="Akcja"
 T_BT_DISABLED="Bluetooth wylaczony.\n\n  Najpierw go wlacz."
 T_SCAN_TITLE="Skanowanie"
@@ -771,7 +693,6 @@ T_DELETE_TITLE="Usun"
 T_CHOOSE_DEL="Wybierz urzadzenie do zapomnienia:"
 T_FORGOTTEN="Urzadzenie zapomniane."
 T_MAIN_TITLE="Menu glowne"
-T_QUIT="Wyjscie"
 T_STATUS="Status BT"
 T_CONN_TO="Polaczono z"
 T_NONE="Brak"
@@ -780,7 +701,6 @@ T_DISABLE="Wylacz"
 T_M_SCAN="Skanuj i polacz"
 T_M_KNOWN="Znane urzadzenia"
 T_M_FORGET="Zapomnij urzadzenie"
-T_M_QUIT="Wyjscie"
 T_FIXING_AUDIO="Naprawa protokolow audio..."
 T_PAIRING="Parowanie w toku..."
 T_INTERNET="Internet wymagany"
@@ -825,12 +745,11 @@ T_STEP6_MSG="\nPrzywracanie sterownika audio RetroArch..."
 T_STEP7_TITLE="Krok 7/7"
 T_STEP7_MSG="\nPrzeladowywanie demona systemd..."
 T_PKG_TITLE="Usunac pakiety?"
-T_PKG_MSG="Instalator mogl zainstalowac:\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nUWAGA: Moga byc uzywane przez inne programy.\n\nUsunac je teraz?"
+T_PKG_MSG="Instalator mogl zainstalowac:\n  - bluez\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - libasound2-plugins, rtkit\n\nUWAGA: Moga byc uzywane przez inne programy.\n\nUsunac je teraz?"
 T_REMOVING_TITLE="Usuwanie pakietow"
 T_REMOVING_MSG="\nUsuwanie pakietow..."
 T_DONE_TITLE="Deinstalacja zakonczona"
 T_DONE_MSG="Co zostalo cofniete:\n\n - zainstalowane uslugi usuniete%PKG%\n - sterowniki audio urzadzenia przywrocone\n - flaga instalacji usunieta\n\nWymagane ponowne uruchomienie aby przywrocic funkcje glosnosci."
-T_REBOOT="Uruchomic ponownie?"
 T_REBOOT_MSG="Uruchomic ponownie aby zastosowac wszystkie zmiany?"
 T_REBOOTING="Ponowne uruchamianie"
 T_FORGET_MENU="Zapomnij wszystkie urzadzenia"
@@ -845,12 +764,6 @@ T_DEP_MSG="Wymagana instalacja. Zainstalowac teraz?"
 T_DEV_INFO="Informacje o urzadzeniu"
 T_UPDATE_AVAILABLE="Dostepna aktualizacja"
 T_DOWNLOAD="Pobrac aktualizacje teraz?"
-T_DISABLED="Wylaczone"
-T_SERVICES="Uslugi"
-T_SERVICES_DISABLED="Uslugi sa wylaczone.\n\n  Najpierw je wlacz."
-T_SERVICES_ENABLED="Uslugi wlaczone"
-T_SERV_MSG="Ponowne uruchomienie moze byc konieczne do przywrocenia funkcji."
-T_SERV_START="Uruchamianie uslug..."
 fi
 
 # -------------------------------------------------------
@@ -1058,7 +971,7 @@ Check_Deps() {
 		Exit_Menu
 	fi
 		   
-    local REQUIRED_PACKAGES=("bluez" "pulseaudio-module-bluetooth" "pulseaudio" "alsa-utils" "evtest" "libasound2-plugins" "dbus-user-session" "dbus-x11" "bluez-tools" "rtkit")
+    local REQUIRED_PACKAGES=("bluez" "pulseaudio-module-bluetooth" "pulseaudio" "alsa-utils" "evtest" "libasound2-plugins" "dbus-user-session" "rtkit")
     local MISSING_PACKAGES=()
     
     for pkg in "${REQUIRED_PACKAGES[@]}"; do
@@ -1240,7 +1153,7 @@ load-module module-bluetooth-policy
 load-module module-bluetooth-discover
 EOF
 	
-	# --- DarkOS needs explicit ALSA sink — udev-detect doesn't create one ---
+	# --- DarkOS: explicit ALSA sink replaces udev-detect ---
     if [ "${ARK_UID}" = "1000" ]; then
          sudo sed -i 's/^load-module module-udev-detect$/load-module module-alsa-sink device=default sink_name=internal_speaker/' /etc/pulse/default.pa
     fi
@@ -1341,38 +1254,6 @@ until [ -S $PULSE_SOCKET ] && \$PA info >/dev/null 2>&1; do
 done
 
 LAST_STATE=""
-declare -A LAST_SEEN
-DEBOUNCE_SEC=5
-
-(
-    bluetoothctl --monitor |
-    while read -r line; do
-        case "\$line" in
-				*"[NEW] Device "*|*"[CHG] Device "*)
-                mac=\$(echo "\$line" | grep -oE '([0-9A-F]{2}:){5}[0-9A-F]{2}')
-                [ -z "\$mac" ] && continue
-				
-				now=\$(date +%s)
-				if [[ -n "\${LAST_SEEN[\$mac]}" ]]; then
-					diff=\$((now - LAST_SEEN[\$mac]))
-					[ "\$diff" -lt "\$DEBOUNCE_SEC" ] && continue
-				fi
-				LAST_SEEN[\$mac]=\$now
-
-                info=\$(bluetoothctl info "\$mac")
-				
-				connected=\$(echo "\$info" | awk -F': ' '/Connected/ {print \$2}')
-				paired=\$(echo "\$info" | awk -F': ' '/Paired/ {print \$2}')
-
-				[ "\$paired" != "yes" ] && continue
-				[ "\$connected" != "no" ] && continue
-
-                sleep 1
-                bluetoothctl connect "\$mac" >/dev/null 2>&1 &
-            ;;
-        esac
-    done
-) &
 
 (
     sleep 2
@@ -1540,7 +1421,7 @@ sudo systemctl enable reset-alsa.service
 # -------------------------------------------------------
 Install_Drivers() {
     dialog \
-		--backtitle "$BACKTITLE" \
+		--backtitle "$T_BACKTITLE" \
         --title "$T_INFO" \
         --infobox "\n  $T_DRIVERS" \
 		5 45 > "$CURR_TTY"
@@ -1753,20 +1634,6 @@ Disable_BT() {
 # -------------------------------------------------------
 Toggle_BT() {
 	local state
-	local sv_state
-	
-	sv_state=$(cat /tmp/bt_services_state 2>/dev/null || \
-    { systemctl is-enabled --quiet pulseaudio.service 2>/dev/null && echo "ON" || echo "OFF"; })
-		
-	if [ "$sv_state" = "OFF" ]; then
-		dialog \
-			--backtitle "$T_BACKTITLE" \
-			--title "$T_DISABLED" \
-			--msgbox "\n  $T_SERVICES_DISABLED" \
-			9 35 > "$CURR_TTY"
-		return
-	fi
-	
 	# --- use state file if available, otherwise fall back to detection ---
 	if [ -f /tmp/bt_manager_state ]; then
 		state=$(cat /tmp/bt_manager_state)	
@@ -1785,93 +1652,6 @@ Toggle_BT() {
 			--infobox "\n  $T_POWERING" \
 			5 35 > "$CURR_TTY"
 		Enable_BT
-	fi
-}
-
-# -------------------------------------------------------
-# Enable Services
-# -------------------------------------------------------
-Enable_Services() {
-	if [[ -f /tmp/bt_services_disable_start ]]; then
-		local elapsed=$(( $(date +%s) - $(cat /tmp/bt_services_disable_start) ))
-		[[ $elapsed -lt 5 ]] && sleep 5
-	fi
-	
-	for svc in bluetooth.service pulseaudio.service reset-alsa.service bt-sink-switch.service bt-volume-monitor.service; do
-		if ! systemctl is-enabled --quiet "$svc" 2>/dev/null; then
-			timeout 5 systemctl enable "$svc" 2>/dev/null
-		fi
-		if ! systemctl is-active --quiet "$svc" 2>/dev/null; then
-			timeout 5 systemctl start "$svc" 2>/dev/null
-		fi
-	done
-	
-	echo "ON" > /tmp/bt_services_state
-	if [[ -f "/root/es_original_backup" ]]; then
-		[[ ! -f "/home/ark/.emulationstation/es_settings.cfg.bak" ]] && cp "/home/ark/.emulationstation/es_settings.cfg" "/home/ark/.emulationstation/es_settings.cfg.bak"
-		sed -i '/<bool name="bluetoothIcon" value="false" \/>/d' /home/ark/.emulationstation/es_settings.cfg
-		chown ark:ark /home/ark/.emulationstation/es_settings.cfg
-		restart_ES="1"
-	fi
-}
-
-# -------------------------------------------------------
-# Disable Services
-# -------------------------------------------------------
-Disable_Services() {
-	echo "$(date +%s)" > /tmp/bt_services_disable_start
-	
-	(
-		Disable_BT
-
-		for svc in bt-volume-monitor.service bt-sink-switch.service reset-alsa.service pulseaudio.service bluetooth.service; do
-			if systemctl is-active --quiet "$svc" 2>/dev/null; then
-				timeout 5 systemctl stop "$svc" 2>/dev/null
-			fi
-			if systemctl is-enabled --quiet "$svc" 2>/dev/null; then
-				timeout 5 systemctl disable "$svc" 2>/dev/null
-			fi
-		done
-	) &
-		
-	echo "OFF" > /tmp/bt_services_state
-	if [[ -f "/root/es_original_backup" ]]; then
-		[[ ! -f "/home/ark/.emulationstation/es_settings.cfg.bak" ]] && cp "/home/ark/.emulationstation/es_settings.cfg" "/home/ark/.emulationstation/es_settings.cfg.bak"
-		tac /home/ark/.emulationstation/es_settings.cfg | sed '0,/<bool name=/{s/<bool name=/<bool name="bluetoothIcon" value="false" \/>\n<bool name=/}' | tac > /tmp/es_settings.tmp && mv /tmp/es_settings.tmp /home/ark/.emulationstation/es_settings.cfg
-		chown ark:ark /home/ark/.emulationstation/es_settings.cfg
-		restart_ES="1"
-	fi
-}
-	
-# -------------------------------------------------------
-# Toggle Services
-# -------------------------------------------------------
-Toggle_Services() {
-	local state
-
-	# --- use state file if available, otherwise fall back to detection ---
-	if [ -f /tmp/bt_services_state ]; then
-		state=$(cat /tmp/bt_services_state)	
-	elif systemctl is-enabled --quiet pulseaudio.service 2>/dev/null; then
-		state="ON"
-	else
-		state="OFF"
-	fi
-
-	if [ "$state" == "ON" ]; then
-		Disable_Services
-	else
-		dialog \
-			--backtitle "$T_BACKTITLE" \
-			--title "$T_ENABLE $T_SERVICES" \
-			--infobox "\n  $T_SERV_START" \
-			5 35 > "$CURR_TTY"
-		Enable_Services
-		dialog \
-			--backtitle "$T_BACKTITLE" \
-			--title "$T_SERVICES_ENABLED" \
-			--msgbox "\n$T_SERV_MSG" \
-			8 45 > "$CURR_TTY"
 	fi
 }
 
@@ -2594,7 +2374,7 @@ EOF
 			echo "$current_p"
 }
 
-        apt-get remove -y bluez pulseaudio pulseaudio-module-bluetooth bluez-tools libasound2-plugins rtkit dbus-x11 >/dev/null 2>&1 &
+        apt-get remove -y bluez pulseaudio pulseaudio-module-bluetooth libasound2-plugins rtkit >/dev/null 2>&1 &
         progress_while_running $! 85 "$T_REMOVING_MSG"
 
         apt-get autoremove -y >/dev/null 2>&1 &
@@ -2675,7 +2455,6 @@ Main_Menu() {
 		local bt_stat
 		local dev_name
 		local bt_state
-		local sv_state
 		
 		# Keep gptokeyb alive
 		if [[ -z $(pgrep -f gptokeyb) ]]; then
@@ -2691,35 +2470,19 @@ Main_Menu() {
             bt_state="OFF"
         fi	
 		
-		if [ -f /tmp/bt_services_state ]; then
-			sv_state=$(cat /tmp/bt_services_state)	
-		elif systemctl is-enabled --quiet pulseaudio.service 2>/dev/null; then
-			sv_state="ON"
+		if [ "$bt_state" = "ON" ]; then
+			local line=$(timeout 3 bluetoothctl devices Connected)
+			local mac=$(echo "$line"  | awk '{print $2}')
+			local info=$(timeout 3 bluetoothctl info "$mac")
+			local battery=$(echo "$info" | awk '/Battery Percentage:/{print $4}' | tr -d '()')
+			[[ -z "$battery" ]] && battery="" || battery=" (${battery}%)"
+			bt_stat="\Z2$T_ON\Zn"
+			dev_name="\Z4$(Get_Connected_Name)${battery}\Zn"
+			toggle_label="$T_DISABLE Bluetooth"
 		else
-			sv_state="OFF"
-		fi
-		
-		if [ "$sv_state" = "OFF" ]; then
-			bt_stat="\Z1${T_DISABLED^^}\Zn"
+			bt_stat="\Z1$T_OFF\Zn"
 			dev_name="$T_NONE"
-			toggle_label="Bluetooth $T_DISABLED"
-			service_toggle="$T_ENABLE $T_SERVICES"
-		else		
-			if [ "$bt_state" = "ON" ]; then
-				local line=$(timeout 3 bluetoothctl devices Connected)
-				local mac=$(echo "$line"  | awk '{print $2}')
-				local info=$(timeout 3 bluetoothctl info "$mac")
-				local battery=$(echo "$info" | awk '/Battery Percentage:/{print $4}' | tr -d '()')
-				[[ -z "$battery" ]] && battery="" || battery=" (${battery}%)"
-				bt_stat="\Z2$T_ON\Zn"
-				dev_name="\Z4$(Get_Connected_Name)${battery}\Zn"
-				toggle_label="$T_DISABLE Bluetooth"
-			else
-				bt_stat="\Z1$T_OFF\Zn"
-				dev_name="$T_NONE"
-				toggle_label="$T_ENABLE Bluetooth"
-			fi
-			service_toggle="$T_DISABLE $T_SERVICES"
+			toggle_label="$T_ENABLE Bluetooth"
 		fi
 		
 		local mainselection
@@ -2736,8 +2499,7 @@ Main_Menu() {
 			4 "$T_M_KNOWN" \
 			5 "$T_M_FORGET" \
 			6 "$T_DEV_INFO" \
-			7 "$service_toggle" \
-			8 "$T_UNINSTALL" \
+			7 "$T_UNINSTALL" \
 			2>&1 > "$CURR_TTY")
 			[ $? -ne 0 ] && Exit_Menu
 			
@@ -2748,8 +2510,7 @@ Main_Menu() {
 			4) Known_Devices ;;
 			5) Forget_Device ;;
 			6) Device_Info ;;
-			7) Toggle_Services ;;
-			8) Uninstaller_Menu ;;
+			7) Uninstaller_Menu ;;
 		esac
 	done
 }
