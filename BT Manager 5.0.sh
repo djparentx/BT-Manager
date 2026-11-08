@@ -2,9 +2,9 @@
 UPDATE="ON"
 
 # =======================================================
-#        	BT Manager 4.3.2 for ArkOS and dArkOS
+#        	BT Manager 5.0.0 for ArkOS and dArkOS
 #					  by djparent
-#   A fork of Bluetooth Manager dArkOS Edition by Jason                
+#        A derivative of Bluetooth Manager by Jason                
 # =======================================================
 VERSION="4.3.2"
 
@@ -49,6 +49,7 @@ ASOUNDRC_BAK="/home/ark/.asoundrcbak"
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 PULSE_SOCKET="/run/user/${ARK_UID}/pulse/native"
 INSTALLED_FLAG="/home/ark/.bt_manager_installed"
+BT_OFF_FLAG="/home/ark/.bt_manager_off"
 ES_CONF="/home/ark/.emulationstation/es_settings.cfg"
 RTL="/lib/firmware"
 
@@ -1224,11 +1225,13 @@ load-module module-always-sink
 load-module module-intended-roles
 load-module module-suspend-on-idle
 load-module module-switch-on-connect
+load-module module-bluetooth-policy
+load-module module-bluetooth-discover
 EOF
 	
 	# --- DarkOS needs explicit ALSA sink — udev-detect doesn't create one ---
     if [ "${ARK_UID}" = "1000" ]; then
-        sudo sed -i '/load-module module-udev-detect/i load-module module-alsa-sink device=default sink_name=internal_speaker' /etc/pulse/default.pa
+         sudo sed -i 's/^load-module module-udev-detect$/load-module module-alsa-sink device=default sink_name=internal_speaker/' /etc/pulse/default.pa
     fi
 	
     # --- Prevent double-loading of modules — system.pa would conflict with default.pa ---
@@ -1239,8 +1242,9 @@ flat-volumes = no
 deferred-volume-safety-margin-usec = 1
 EOF
 
-    # --- Activate Autospawn ---
-    grep -q "autospawn = yes" /etc/pulse/client.conf 2>/dev/null || echo "autospawn = yes" | sudo tee -a /etc/pulse/client.conf > /dev/null
+    # --- Disable Autospawn ---
+    sudo mkdir -p /etc/pulse/client.conf.d
+    echo "autospawn = no" | sudo tee /etc/pulse/client.conf.d/90-bt-manager.conf > /dev/null
 
     # --- PulseAudio Service ---
     cat <<EOF | sudo tee /etc/systemd/system/pulseaudio.service > /dev/null
@@ -1248,8 +1252,10 @@ EOF
 Description=PulseAudio Sound Daemon
 After=bluetooth.service alsa-restore.service
 Before=emulationstation.service
+ConditionPathExists=!${BT_OFF_FLAG}
 
 [Service]
+TimeoutStopSec=5
 Type=simple
 User=ark
 Environment=PULSE_RUNTIME_PATH=/run/user/${ARK_UID}/pulse
@@ -1273,6 +1279,7 @@ Description=R36S Volume Buttons Monitor
 After=pulseaudio.service
 
 [Service]
+TimeoutStopSec=5
 Type=simple
 ExecStart=/usr/local/bin/bt-volume-monitor.sh
 Restart=always
@@ -1296,6 +1303,7 @@ After=pulseaudio.service bluetooth.service
 After=sound.target
 
 [Service]
+TimeoutStopSec=5
 Type=simple
 User=ark
 Environment=PULSE_RUNTIME_PATH=/run/user/${ARK_UID}/pulse
@@ -1355,6 +1363,18 @@ DEBOUNCE_SEC=5
     done
 ) &
 
+(
+    sleep 2
+    timeout 12 bluetoothctl devices | awk '{print \$2}' | while read -r mac; do
+        if timeout 12 bluetoothctl info "\$mac" | grep -q "Paired: yes"; then
+            timeout 12 bluetoothctl connect "\$mac" >/dev/null 2>&1
+            if ! timeout 12 bluetoothctl info "\$mac" | grep -q "Connected: yes"; then
+                timeout 12 bluetoothctl connect "\$mac" >/dev/null 2>&1
+            fi
+        fi
+    done
+) &
+
 while true; do
     CONNECTED=\$(timeout 2 bluetoothctl info 2>/dev/null | grep -c "Connected: yes")
     if [ "\$CONNECTED" -gt 0 ] && [ "\$LAST_STATE" != "connected" ]; then
@@ -1367,6 +1387,7 @@ while true; do
         sleep 1
         BT_SINK=\$(\$PA list short sinks 2>/dev/null | grep bluez_sink | awk '{print \$2}')
         [ -n "\$BT_SINK" ] && \$PA set-default-sink "\$BT_SINK" 2>/dev/null
+        [ -n "\$BT_SINK" ] && printf 'pcm.!default {\n    type pulse\n    server unix:$PULSE_SOCKET\n}\nctl.!default { type hw card 0 }\n' > /home/ark/.asoundrc
         for stream in \$(\$PA list short sink-inputs 2>/dev/null | awk '{print \$1}'); do
             \$PA move-sink-input "\$stream" "\$BT_SINK" 2>/dev/null
         done
@@ -1418,6 +1439,10 @@ EOF
 		echo "PULSE_SERVER=unix:${PULSE_SOCKET}" >> /etc/environment
 	grep -q "XDG_RUNTIME_DIR" /etc/environment 2>/dev/null || \
 		echo "XDG_RUNTIME_DIR=/run/user/${ARK_UID}" >> /etc/environment
+	sudo -u ark XDG_RUNTIME_DIR=/run/user/${ARK_UID} systemctl --user stop pulseaudio.socket pulseaudio.service 2>/dev/null
+	sudo systemctl --global mask pulseaudio.socket pulseaudio.service
+	sudo mkdir -p /etc/systemd/system/bluetooth.service.d
+	printf '[Service]\nTimeoutStopSec=5\n' | sudo tee /etc/systemd/system/bluetooth.service.d/90-bt-manager.conf > /dev/null
 	
     sudo systemctl daemon-reload
     sudo systemctl unmask bluetooth.service 2>/dev/null
@@ -1574,7 +1599,7 @@ Check_Pulse() {
 	export DBUS_SESSION_BUS_ADDRESS=unix:path=$XDG_RUNTIME_DIR/bus
 
 	if ! sudo -u ark XDG_RUNTIME_DIR=/run/user/${ARK_UID} pactl info >/dev/null 2>&1; then
-        sudo -u ark XDG_RUNTIME_DIR=/run/user/${ARK_UID} pulseaudio --start
+        systemctl start pulseaudio.service
 	fi
 	
 	sleep 0.1
@@ -1651,10 +1676,17 @@ Force_Internal_Audio() {
 Enable_BT() {
 	local waited=0
 	
-	while rfkill list bluetooth | grep -q "Soft blocked: no" || ! pactl --server=unix:${PULSE_SOCKET} info >/dev/null 2>&1; do
+	while rfkill list bluetooth | grep -q "Soft blocked: no"; do
 		sleep 3
 		waited=$((waited + 3))
 		[ $waited -ge 15 ] && break
+	done
+
+	rm -f "$BT_OFF_FLAG"
+	timeout 5 systemctl start pulseaudio.service > /dev/null 2>&1
+	for _ in {1..40}; do
+		pactl --server=unix:${PULSE_SOCKET} info >/dev/null 2>&1 && break
+		sleep 0.25
 	done
 	
 	timeout 3 rfkill unblock bluetooth > /dev/null 2>&1
@@ -1687,11 +1719,13 @@ Enable_BT() {
 # Disable Bluetooth
 # -------------------------------------------------------
 Disable_BT() {
+	touch "$BT_OFF_FLAG"
 	(
 		timeout 3 bluetoothctl power off > /dev/null 2>&1
 		timeout 5 systemctl stop bluetooth > /dev/null 2>&1
+		Force_Internal_Audio
+		timeout 5 systemctl stop pulseaudio.service > /dev/null 2>&1
 		timeout 3 rfkill block bluetooth > /dev/null 2>&1
-		Force_Internal_Audio &
 	) > /dev/null 2>&1 &
 	
 	echo "OFF" > /tmp/bt_manager_state
@@ -2385,7 +2419,8 @@ Run_Uninstall() {
 
     for svc in bt-volume-monitor.service bt-sink-switch.service reset-alsa.service pulseaudio.service bluetooth.service; do
         if systemctl is-active --quiet "$svc" 2>/dev/null; then
-            systemctl stop "$svc" 2>/dev/null
+            timeout 3 systemctl stop "$svc" 2>/dev/null
+            systemctl kill -s SIGKILL "$svc" 2>/dev/null
         fi
         if systemctl is-enabled --quiet "$svc" 2>/dev/null; then
             systemctl disable "$svc" 2>/dev/null
@@ -2406,6 +2441,9 @@ Run_Uninstall() {
 		"/etc/udev/rules.d/99-input-event3.rules"
 		"/etc/pulse/default.pa"
 		"/etc/pulse/daemon.conf"
+		"/etc/pulse/client.conf.d/90-bt-manager.conf"
+		"/etc/systemd/system/bluetooth.service.d/90-bt-manager.conf"
+		"$BT_OFF_FLAG"
         "$INSTALLED_FLAG"
     )
 
@@ -2421,6 +2459,8 @@ Run_Uninstall() {
 	sed -i '/autospawn = yes/d' /etc/pulse/client.conf 2>/dev/null || true
 	sed -i '/PULSE_SERVER/d' /etc/environment 2>/dev/null || true
 	sed -i '/XDG_RUNTIME_DIR/d' /etc/environment 2>/dev/null || true
+	systemctl --global unmask pulseaudio.socket pulseaudio.service 2>/dev/null || true
+	rmdir /etc/systemd/system/bluetooth.service.d 2>/dev/null || true
 	sudo udevadm control --reload-rules
 
     # --- Restore /etc/bluetooth/main.conf ---
