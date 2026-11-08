@@ -48,7 +48,7 @@ ASOUNDRC="/home/ark/.asoundrc"
 ASOUNDRC_BAK="/home/ark/.asoundrcbak"
 SCRIPT_DIR="$(dirname "$(realpath "$0")")"
 PULSE_SOCKET="/run/user/${ARK_UID}/pulse/native"
-INSTALLED_FLAG="/home/ark/.bt_manager_installed"
+INSTALLED_FLAG="/home/ark/.bt_manager_installed_v5"
 BT_OFF_FLAG="/home/ark/.bt_manager_off"
 ES_CONF="/home/ark/.emulationstation/es_settings.cfg"
 RTL="/lib/firmware"
@@ -830,11 +830,21 @@ Self_Update() {
 		return
 	fi
 
-	touch /home/ark/.bt_show_changelog
-	local new_path="${0%/*}/BT Manager ${latest}.sh"
-	curl -L "$url" -o "$new_path" && chmod +x "$new_path"
-	[[ "$0" != "$new_path" ]] && rm -f "$0"
-	exec "$new_path"
+	local new_path
+	if [[ "$SCRIPT_DIR" == "/usr/local/bin" ]]; then
+		new_path="/usr/local/bin/BT Manager.sh"
+	else
+		new_path="${0%/*}/BT Manager ${latest}.sh"
+	fi
+	local tmp_path="/tmp/bt_manager_update.$$"
+	if curl -fL "$url" -o "$tmp_path" && [ -s "$tmp_path" ]; then
+		chmod +x "$tmp_path"
+		mv -f "$tmp_path" "$new_path"
+		[[ "$0" != "$new_path" ]] && rm -f "$0"
+		touch /home/ark/.bt_show_changelog
+		exec "$new_path"
+	fi
+	rm -f "$tmp_path"
 }
 
 # -------------------------------------------------------
@@ -2204,6 +2214,16 @@ Run_Uninstall() {
 	# -- Force audio back to internal speaker ---
 	Force_Internal_Audio
 	sleep 0.1
+
+	# --- Hide the Bluetooth icon in ES ---
+	if [[ -f "/root/es_original_backup" ]]; then
+		[[ ! -f "/home/ark/.emulationstation/es_settings.cfg.bak" ]] && cp "/home/ark/.emulationstation/es_settings.cfg" "/home/ark/.emulationstation/es_settings.cfg.bak"
+		if ! grep -q '<bool name="bluetoothIcon" value="false" />' /home/ark/.emulationstation/es_settings.cfg; then
+			tac /home/ark/.emulationstation/es_settings.cfg | sed '0,/<bool name=/{s/<bool name=/<bool name="bluetoothIcon" value="false" \/>\n<bool name=/}' | tac > /tmp/es_settings.tmp && mv /tmp/es_settings.tmp /home/ark/.emulationstation/es_settings.cfg
+		fi
+		chown ark:ark /home/ark/.emulationstation/es_settings.cfg
+		restart_ES="1"
+	fi
 
     # --- Stop and Disable Services ---
     infobox_gui "$T_STEP1_TITLE" "$T_STEP1_MSG"
