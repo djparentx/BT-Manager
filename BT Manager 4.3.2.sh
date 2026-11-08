@@ -157,7 +157,7 @@ T_STEP6_MSG="\nRestoring RetroArch audio driver..."
 T_STEP7_TITLE="Step 7/7"
 T_STEP7_MSG="\nReloading systemd daemon..."
 T_PKG_TITLE="Remove Packages?"
-T_PKG_MSG="The installer may have installed:\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins\n\nWARNING: May be used by other software.\n\nRemove them now?"
+T_PKG_MSG="The installer may have installed:\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nWARNING: May be used by other software.\n\nRemove them now?"
 T_REMOVING_TITLE="Removing Packages"
 T_REMOVING_MSG="\nRemoving packages..."
 T_DONE_TITLE="Uninstall Complete"
@@ -270,7 +270,7 @@ T_STEP6_MSG="\nRestauration du pilote audio RetroArch..."
 T_STEP7_TITLE="Etape 7/7"
 T_STEP7_MSG="\nRechargement du daemon systemd..."
 T_PKG_TITLE="Supprimer les paquets ?"
-T_PKG_MSG="L'installateur a peut-etre installe :\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins\n\nATTENTION : Peuvent etre utilises par d'autres logiciels.\n\nLes supprimer maintenant ?"
+T_PKG_MSG="L'installateur a peut-etre installe :\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nATTENTION : Peuvent etre utilises par d'autres logiciels.\n\nLes supprimer maintenant ?"
 T_REMOVING_TITLE="Suppression des paquets"
 T_REMOVING_MSG="\nSuppression des paquets..."
 T_DONE_TITLE="Desinstallation terminee"
@@ -381,7 +381,7 @@ T_STEP6_MSG="\nRestaurando controlador de audio RetroArch..."
 T_STEP7_TITLE="Paso 7/7"
 T_STEP7_MSG="\nRecargando daemon de systemd..."
 T_PKG_TITLE="Eliminar Paquetes ?"
-T_PKG_MSG="El instalador puede haber instalado :\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins\n\nADVERTENCIA : Pueden ser usados por otro software.\n\nEliminarlos ahora ?"
+T_PKG_MSG="El instalador puede haber instalado :\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nADVERTENCIA : Pueden ser usados por otro software.\n\nEliminarlos ahora ?"
 T_REMOVING_TITLE="Eliminando Paquetes"
 T_REMOVING_MSG="\nEliminando paquetes..."
 T_DONE_TITLE="Desinstalacion Completa"
@@ -492,7 +492,7 @@ T_STEP6_MSG="\nRestaurando driver de audio do RetroArch..."
 T_STEP7_TITLE="Passo 7/7"
 T_STEP7_MSG="\nRecarregando daemon do systemd..."
 T_PKG_TITLE="Remover Pacotes ?"
-T_PKG_MSG="O instalador pode ter instalado :\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins\n\nAVISO : Podem ser usados por outros programas.\n\nRemove-los agora ?"
+T_PKG_MSG="O instalador pode ter instalado :\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nAVISO : Podem ser usados por outros programas.\n\nRemove-los agora ?"
 T_REMOVING_TITLE="Removendo Pacotes"
 T_REMOVING_MSG="\nRemovendo pacotes..."
 T_DONE_TITLE="Desinstalacao Concluida"
@@ -602,7 +602,7 @@ T_STEP6_MSG="\nRipristino del driver audio RetroArch..."
 T_STEP7_TITLE="Passo 7/7"
 T_STEP7_MSG="\nRicaricamento del daemon di systemd..."
 T_PKG_TITLE="Rimuovere i Pacchetti ?"
-T_PKG_MSG="Il programma di installazione potrebbe aver installato :\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins\n\nATTENZIONE : Potrebbero essere usati da altri software.\n\nRimuoverli ora ?"
+T_PKG_MSG="Il programma di installazione potrebbe aver installato :\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nATTENZIONE : Potrebbero essere usati da altri software.\n\nRimuoverli ora ?"
 T_REMOVING_TITLE="Rimozione Pacchetti"
 T_REMOVING_MSG="\nRimozione dei pacchetti..."
 T_DONE_TITLE="Disinstallazione Completata"
@@ -713,7 +713,7 @@ T_STEP6_MSG="\nRetroArch-Audiotreiber wird wiederhergestellt..."
 T_STEP7_TITLE="Schritt 7/7"
 T_STEP7_MSG="\nSystemd-Daemon wird neu geladen..."
 T_PKG_TITLE="Pakete entfernen?"
-T_PKG_MSG="Der Installer hat moeglicherweise folgendes installiert:\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins\n\nWARNUNG: Moeglicherweise von anderer Software genutzt.\n\nJetzt entfernen?"
+T_PKG_MSG="Der Installer hat moeglicherweise folgendes installiert:\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nWARNUNG: Moeglicherweise von anderer Software genutzt.\n\nJetzt entfernen?"
 T_REMOVING_TITLE="Pakete werden entfernt"
 T_REMOVING_MSG="\nPakete werden entfernt..."
 T_DONE_TITLE="Deinstallation abgeschlossen"
@@ -824,7 +824,7 @@ T_STEP6_MSG="\nPrzywracanie sterownika audio RetroArch..."
 T_STEP7_TITLE="Krok 7/7"
 T_STEP7_MSG="\nPrzeladowywanie demona systemd..."
 T_PKG_TITLE="Usunac pakiety?"
-T_PKG_MSG="Instalator mogl zainstalowac:\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins\n\nUWAGA: Moga byc uzywane przez inne programy.\n\nUsunac je teraz?"
+T_PKG_MSG="Instalator mogl zainstalowac:\n  - bluez\n  - bluez-tools\n  - pulseaudio\n  - pulseaudio-module-bluetooth\n  - dbus-x11\n  - libasound2-plugins, rtkit\n\nUWAGA: Moga byc uzywane przez inne programy.\n\nUsunac je teraz?"
 T_REMOVING_TITLE="Usuwanie pakietow"
 T_REMOVING_MSG="\nUsuwanie pakietow..."
 T_DONE_TITLE="Deinstalacja zakonczona"
@@ -1057,7 +1057,7 @@ Check_Deps() {
 		Exit_Menu
 	fi
 		   
-    local REQUIRED_PACKAGES=("bluez" "pulseaudio-module-bluetooth" "pulseaudio" "alsa-utils" "evtest" "libasound2-plugins" "dbus-user-session" "dbus-x11" "bluez-tools")
+    local REQUIRED_PACKAGES=("bluez" "pulseaudio-module-bluetooth" "pulseaudio" "alsa-utils" "evtest" "libasound2-plugins" "dbus-user-session" "dbus-x11" "bluez-tools" "rtkit")
     local MISSING_PACKAGES=()
     
     for pkg in "${REQUIRED_PACKAGES[@]}"; do
@@ -1110,7 +1110,7 @@ Check_Deps() {
                 start_section=$(( 25 + ( (COUNT - 1) * 70 / TOTAL ) ))
                 end_section=$(( 25 + ( COUNT * 70 / TOTAL ) ))
                 
-                DEBIAN_FRONTEND=noninteractive apt-get install -y "$pkg" >/dev/null 2>&1 &
+                DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends "$pkg" >/dev/null 2>&1 &
                 progress_while_running $! $end_section "$T_PACKAGE $pkg ($COUNT/$TOTAL)..."
             done
 
@@ -1177,11 +1177,11 @@ sync_vol
 
 while read line; do
     if [[ "\$line" == *"KEY_VOLUMEUP"* && "\$line" == *"value 1"* ]]; then
-        refresh_sink; setvol 1
+        refresh_sink; sync_vol; setvol 1
     elif [[ "\$line" == *"KEY_VOLUMEUP"* && "\$line" == *"value 2"* ]]; then
         setvol 1
     elif [[ "\$line" == *"KEY_VOLUMEDOWN"* && "\$line" == *"value 1"* ]]; then
-        refresh_sink; setvol -1
+        refresh_sink; sync_vol; setvol -1
     elif [[ "\$line" == *"KEY_VOLUMEDOWN"* && "\$line" == *"value 2"* ]]; then
         setvol -1
     fi
@@ -1359,7 +1359,7 @@ while true; do
     CONNECTED=\$(timeout 2 bluetoothctl info 2>/dev/null | grep -c "Connected: yes")
     if [ "\$CONNECTED" -gt 0 ] && [ "\$LAST_STATE" != "connected" ]; then
         ICON=\$(bluetoothctl info 2>/dev/null | grep "Icon:" | awk '{print \$2}')
-        [[ "\$ICON" != audio* ]] && continue
+        [[ "\$ICON" != audio* ]] && { sleep 2; continue; }
         LAST_STATE="connected"
         sleep 1
         CARD=\$(\$PA list short cards 2>/dev/null | grep bluez_card | awk '{print \$2}')
@@ -2543,7 +2543,7 @@ EOF
 			echo "$current_p"
 }
 
-        apt-get remove -y bluez pulseaudio pulseaudio-module-bluetooth bluez-tools libasound2-plugins dbus-x11 >/dev/null 2>&1 &
+        apt-get remove -y bluez pulseaudio pulseaudio-module-bluetooth bluez-tools libasound2-plugins rtkit dbus-x11 >/dev/null 2>&1 &
         progress_while_running $! 85 "$T_REMOVING_MSG"
 
         apt-get autoremove -y >/dev/null 2>&1 &
