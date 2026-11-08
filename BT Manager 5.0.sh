@@ -1162,7 +1162,7 @@ sync_vol() {
 setvol() {
     local DIR=\$1
     [ -z "\$BT_SINK" ] && return
-    CUR_VOL=\$(( DIR > 0 ? CUR_VOL + 2 : CUR_VOL - 2 ))
+    CUR_VOL=\$(( DIR > 0 ? CUR_VOL + 1 : CUR_VOL - 1 ))
     [ "\$CUR_VOL" -gt 100 ] && CUR_VOL=100
     [ "\$CUR_VOL" -lt 0 ] && CUR_VOL=0
     \$PA set-sink-volume "\$BT_SINK" \${CUR_VOL}% >/dev/null 2>&1
