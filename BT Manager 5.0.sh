@@ -860,12 +860,13 @@ Change_Log() {
 		--msgbox "\n\
       \Z4https://github.com/djparentx\Zn\n\
           --------------------\n\
-   ◦ disabling Bluetooth now hides the\n\
-     icon too\n\
-   ◦ fixed BLE device support, they\n\
-     should now show up in scans\n\
-   ◦ fixed BLE gamepad support, they\n\
-     should now show up in scans\n\
+   ◦ only one PulseAudio now, and it\n\
+     runs only while Bluetooth is on\n\
+   ◦ reconnects paired devices at boot\n\
+   ◦ emulators use BT after reconnect\n\
+   ◦ BT volume now matches the overlay\n\
+   ◦ faster uninstall and reboot\n\
+   ◦ removed Disable Services\n\
 	" \
 		14 45 > "$CURR_TTY"
 		
