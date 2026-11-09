@@ -1620,12 +1620,6 @@ Enable_BT() {
 	) >/dev/null 2>&1 &
 	
 	echo "ON" > /tmp/bt_manager_state
-	if [[ -f "/root/es_original_backup" ]]; then
-		[[ ! -f "/home/ark/.emulationstation/es_settings.cfg.bak" ]] && cp "/home/ark/.emulationstation/es_settings.cfg" "/home/ark/.emulationstation/es_settings.cfg.bak"
-		sed -i '/<bool name="bluetoothIcon" value="false" \/>/d' /home/ark/.emulationstation/es_settings.cfg
-		chown ark:ark /home/ark/.emulationstation/es_settings.cfg
-		restart_ES="1"
-	fi
 }
 
 # -------------------------------------------------------
@@ -1642,12 +1636,6 @@ Disable_BT() {
 	) > /dev/null 2>&1 &
 	
 	echo "OFF" > /tmp/bt_manager_state
-	if [[ -f "/root/es_original_backup" ]]; then
-		[[ ! -f "/home/ark/.emulationstation/es_settings.cfg.bak" ]] && cp "/home/ark/.emulationstation/es_settings.cfg" "/home/ark/.emulationstation/es_settings.cfg.bak"
-		tac /home/ark/.emulationstation/es_settings.cfg | sed '0,/<bool name=/{s/<bool name=/<bool name="bluetoothIcon" value="false" \/>\n<bool name=/}' | tac > /tmp/es_settings.tmp && mv /tmp/es_settings.tmp /home/ark/.emulationstation/es_settings.cfg
-		chown ark:ark /home/ark/.emulationstation/es_settings.cfg
-		restart_ES="1"
-	fi
 }
 	
 # -------------------------------------------------------
@@ -2225,16 +2213,6 @@ Run_Uninstall() {
 	# -- Force audio back to internal speaker ---
 	Force_Internal_Audio
 	sleep 0.1
-
-	# --- Hide the Bluetooth icon in ES ---
-	if [[ -f "/root/es_original_backup" ]]; then
-		[[ ! -f "/home/ark/.emulationstation/es_settings.cfg.bak" ]] && cp "/home/ark/.emulationstation/es_settings.cfg" "/home/ark/.emulationstation/es_settings.cfg.bak"
-		if ! grep -q '<bool name="bluetoothIcon" value="false" />' /home/ark/.emulationstation/es_settings.cfg; then
-			tac /home/ark/.emulationstation/es_settings.cfg | sed '0,/<bool name=/{s/<bool name=/<bool name="bluetoothIcon" value="false" \/>\n<bool name=/}' | tac > /tmp/es_settings.tmp && mv /tmp/es_settings.tmp /home/ark/.emulationstation/es_settings.cfg
-		fi
-		chown ark:ark /home/ark/.emulationstation/es_settings.cfg
-		restart_ES="1"
-	fi
 
     # --- Stop and Disable Services ---
     infobox_gui "$T_STEP1_TITLE" "$T_STEP1_MSG"
