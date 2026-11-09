@@ -922,7 +922,7 @@ Get_Connected_Name() {
 # Route ALSA through PulseAudio (for BT audio)
 # -------------------------------------------------------
 Set_Asound_Pulse() {
-    cat <<ASOUND > "$ASOUNDRC"
+    cat <<ASOUND > "$ASOUNDRC.tmp"
 pcm.!default {
     type pulse
     server unix:$PULSE_SOCKET
@@ -932,7 +932,8 @@ ctl.!default {
     server unix:$PULSE_SOCKET
 }
 ASOUND
-    chown ark:ark "$ASOUNDRC"
+    chown ark:ark "$ASOUNDRC.tmp"
+    mv -f "$ASOUNDRC.tmp" "$ASOUNDRC"
 }
 
 # -------------------------------------------------------
@@ -940,9 +941,9 @@ ASOUND
 # -------------------------------------------------------
 Set_Asound_Direct() {
     if [ -f "$ASOUNDRC_BAK" ] && [ -s "$ASOUNDRC_BAK" ]; then
-        cp "$ASOUNDRC_BAK" "$ASOUNDRC"
+        cp "$ASOUNDRC_BAK" "$ASOUNDRC.tmp"
     else
-        cat <<ASOUND > "$ASOUNDRC"
+        cat <<ASOUND > "$ASOUNDRC.tmp"
 pcm.!default {
     type plug
     slave.pcm "dmixer"
@@ -965,7 +966,8 @@ pcm.dmixer {
 ctl.!default { type hw card 0 }
 ASOUND
     fi
-    chown ark:ark "$ASOUNDRC"
+    chown ark:ark "$ASOUNDRC.tmp"
+    mv -f "$ASOUNDRC.tmp" "$ASOUNDRC"
 }
 
 # -------------------------------------------------------
@@ -1290,7 +1292,7 @@ while true; do
         sleep 1
         BT_SINK=\$(\$PA list short sinks 2>/dev/null | grep bluez_sink | awk '{print \$2}')
         [ -n "\$BT_SINK" ] && \$PA set-default-sink "\$BT_SINK" 2>/dev/null
-        [ -n "\$BT_SINK" ] && printf 'pcm.!default {\n    type pulse\n    server unix:$PULSE_SOCKET\n}\nctl.!default { type hw card 0 }\n' > /home/ark/.asoundrc
+        [ -n "\$BT_SINK" ] && printf 'pcm.!default {\n    type pulse\n    server unix:$PULSE_SOCKET\n}\nctl.!default { type hw card 0 }\n' > /home/ark/.asoundrc.tmp && mv -f /home/ark/.asoundrc.tmp /home/ark/.asoundrc
         for stream in \$(\$PA list short sink-inputs 2>/dev/null | awk '{print \$1}'); do
             \$PA move-sink-input "\$stream" "\$BT_SINK" 2>/dev/null
         done
@@ -1403,9 +1405,9 @@ ASOUNDRC_BAK="/home/ark/.asoundrcbak"
 
 # Restore .asoundrc to direct ALSA
 if [ -f "$ASOUNDRC_BAK" ] && [ -s "$ASOUNDRC_BAK" ]; then
-    cp "$ASOUNDRC_BAK" "$ASOUNDRC"
+    cp "$ASOUNDRC_BAK" "$ASOUNDRC.tmp"
 else
-    cat <<ASOUND > "$ASOUNDRC"
+    cat <<ASOUND > "$ASOUNDRC.tmp"
 pcm.!default {
     type plug
     slave.pcm "dmixer"
@@ -1428,7 +1430,8 @@ pcm.dmixer {
 ctl.!default { type hw card 0 }
 ASOUND
 fi
-chown ark:ark "$ASOUNDRC"
+chown ark:ark "$ASOUNDRC.tmp"
+mv -f "$ASOUNDRC.tmp" "$ASOUNDRC"
 EOF
 
 sudo chmod +x /usr/local/bin/reset-alsa.sh
