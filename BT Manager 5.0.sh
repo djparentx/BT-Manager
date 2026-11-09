@@ -1348,10 +1348,11 @@ EOF
 	printf '[Service]\nTimeoutStopSec=5\n' | sudo tee /etc/systemd/system/bluetooth.service.d/90-bt-manager.conf > /dev/null
 
 	# --- 32-bit Pulse plugins (only these files, not the package and its dependencies) ---
-	if dpkg -s libpulse0:armhf >/dev/null 2>&1 && [ -d /usr/lib/arm-linux-gnueabihf/alsa-lib ]; then
+	if dpkg -s libpulse0:armhf >/dev/null 2>&1; then
 		local plugin_tmp
 		plugin_tmp=$(mktemp -d)
 		if (cd "$plugin_tmp" && apt-get download libasound2-plugins:armhf >/dev/null 2>&1 && dpkg-deb -x libasound2-plugins_*_armhf.deb extract); then
+			mkdir -p /usr/lib/arm-linux-gnueabihf/alsa-lib
 			cp "$plugin_tmp"/extract/usr/lib/arm-linux-gnueabihf/alsa-lib/libasound_module_{conf,ctl,pcm}_pulse.so /usr/lib/arm-linux-gnueabihf/alsa-lib/ 2>/dev/null
 		fi
 		rm -rf "$plugin_tmp"
@@ -2255,7 +2256,8 @@ Run_Uninstall() {
             rm -f "$f"
         fi
     done
-	
+	rmdir /usr/lib/arm-linux-gnueabihf/alsa-lib 2>/dev/null || true	
+
 	rm -rf /home/ark/.config/pulse/ 2>/dev/null || true
 	rm -rf /run/user/${ARK_UID}/pulse/ 2>/dev/null || true
 	cp /home/ark/.asoundrcbak /home/ark/.asoundrc 2>/dev/null || true
