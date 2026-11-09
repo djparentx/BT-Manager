@@ -1292,7 +1292,7 @@ while true; do
         sleep 1
         BT_SINK=\$(\$PA list short sinks 2>/dev/null | grep bluez_sink | awk '{print \$2}')
         [ -n "\$BT_SINK" ] && \$PA set-default-sink "\$BT_SINK" 2>/dev/null
-        [ -n "\$BT_SINK" ] && printf 'pcm.!default {\n    type pulse\n    server unix:$PULSE_SOCKET\n}\nctl.!default { type hw card 0 }\n' > /home/ark/.asoundrc.tmp && mv -f /home/ark/.asoundrc.tmp /home/ark/.asoundrc
+        [ -n "\$BT_SINK" ] && printf 'pcm.!default {\n    type pulse\n    server unix:$PULSE_SOCKET\n}\nctl.!default {\n    type pulse\n    server unix:$PULSE_SOCKET\n}\n' > /home/ark/.asoundrc.tmp && mv -f /home/ark/.asoundrc.tmp /home/ark/.asoundrc
         for stream in \$(\$PA list short sink-inputs 2>/dev/null | awk '{print \$1}'); do
             \$PA move-sink-input "\$stream" "\$BT_SINK" 2>/dev/null
         done
