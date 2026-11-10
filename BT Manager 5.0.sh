@@ -6,7 +6,7 @@ UPDATE="ON"
 #					  by djparent
 #        A derivative of Bluetooth Manager by Jason                
 # =======================================================
-VERSION="4.3.2"
+VERSION="5.0.0"
 
 # Copyright (c) 2026 Jason3x
 #
