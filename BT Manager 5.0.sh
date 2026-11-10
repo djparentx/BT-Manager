@@ -1063,67 +1063,140 @@ Check_Deps() {
 Fix_Volume_Script() {
     cat <<EOF | sudo tee /usr/local/bin/bt-volume-monitor.sh > /dev/null
 #!/bin/bash
+export LC_ALL=C
 PA="pactl --server=unix:$PULSE_SOCKET"
+SAVE="/var/cache/bt-manager/speaker_volume"
+CAP_PCT=50
 
-until [ -S $PULSE_SOCKET ]; do
+until MAX_VOL=\$(amixer -c 0 sget Playback 2>/dev/null | awk '/Limits:/{print \$NF; exit}') && [[ "\$MAX_VOL" =~ ^[0-9]+\$ ]] && [ "\$MAX_VOL" -gt 0 ]; do
     sleep 1
 done
 
-EV="/dev/input/event3"
-[ ! -e "\$EV" ] && EV="/dev/input/\$(grep -E 'Handlers|Name' /proc/bus/input/devices | grep -A1 "odroidgo3-keys" | grep -oE 'event[0-9]+' | head -n1)"
-
-MAX_VOL=\$(amixer -c 0 sget Playback 2>/dev/null | awk '/Limits:/{print \$NF; exit}')
-[[ "\$MAX_VOL" =~ ^[0-9]+\$ ]] && [ "\$MAX_VOL" -gt 0 ] || MAX_VOL=100
-STEP_VOL=\$(( (MAX_VOL + 99) / 100 ))
-CUR_VOL=\$(( MAX_VOL * 60 / 100 ))
-LAST_PCT=60
 BT_SINK=""
+LAST_RAW=""
+LAST_PCT=""
+MUTED=""
+OWN_T=0
 
-refresh_sink() {
-    BT_SINK=\$(\$PA list short sinks 2>/dev/null | grep bluez_sink | awk '{print \$2}')
+get_hw() {
+    amixer -c 0 sget Playback 2>/dev/null | grep -oE '[0-9]+ \[' | head -n1 | tr -dc '0-9'
 }
 
-sync_vol() {
-    [ -z "\$BT_SINK" ] && return
-    local V=\$(\$PA list sinks 2>/dev/null | awk "/Name: \$BT_SINK/{found=1} found && /Volume:/ && !/Base/{match(\\\$0,/[0-9]+%/); print substr(\\\$0,RSTART,RLENGTH-1); exit}")
-    if [ -n "\$V" ]; then
-        local D=\$(( V - LAST_PCT ))
-        if [ "\${D#-}" -gt 1 ]; then
-            CUR_VOL=\$(( V * MAX_VOL / 100 ))
-            LAST_PCT=\$V
-        fi
-    fi
+set_hw() {
+    amixer -c 0 -q sset Playback "\$1" >/dev/null 2>&1
 }
 
-setvol() {
-    local DIR=\$1
-    [ -z "\$BT_SINK" ] && return
-    CUR_VOL=\$(( DIR > 0 ? CUR_VOL + STEP_VOL : CUR_VOL - STEP_VOL ))
-    [ "\$CUR_VOL" -gt "\$MAX_VOL" ] && CUR_VOL=\$MAX_VOL
-    [ "\$CUR_VOL" -lt 0 ] && CUR_VOL=0
-    LAST_PCT=\$(( (CUR_VOL * 100 + MAX_VOL / 2) / MAX_VOL ))
-    \$PA set-sink-volume "\$BT_SINK" \${LAST_PCT}% >/dev/null 2>&1
-    if [ "\$CUR_VOL" -eq 0 ]; then
-        \$PA set-sink-mute "\$BT_SINK" 1 >/dev/null 2>&1
-    else
-        \$PA set-sink-mute "\$BT_SINK" 0 >/dev/null 2>&1
-    fi
+find_sink() {
+    BT_SINK=\$(\$PA list short sinks 2>/dev/null | awk '/bluez_sink/{print \$2; exit}')
 }
 
-refresh_sink
-sync_vol
+get_bt() {
+    \$PA get-sink-volume "\$BT_SINK" 2>/dev/null | grep -oE '[0-9]+%' | head -n1 | tr -d '%'
+}
 
-while read line; do
-    if [[ "\$line" == *"KEY_VOLUMEUP"* && "\$line" == *"value 1"* ]]; then
-        refresh_sink; sync_vol; setvol 1
-    elif [[ "\$line" == *"KEY_VOLUMEUP"* && "\$line" == *"value 2"* ]]; then
-        setvol 1
-    elif [[ "\$line" == *"KEY_VOLUMEDOWN"* && "\$line" == *"value 1"* ]]; then
-        refresh_sink; sync_vol; setvol -1
-    elif [[ "\$line" == *"KEY_VOLUMEDOWN"* && "\$line" == *"value 2"* ]]; then
-        setvol -1
+set_bt() {
+    local M=0
+    [ "\$1" -eq 0 ] && M=1
+    \$PA set-sink-volume "\$BT_SINK" "\$1%" >/dev/null 2>&1
+    if [ "\$M" != "\$MUTED" ]; then
+        \$PA set-sink-mute "\$BT_SINK" "\$M" >/dev/null 2>&1
+        MUTED=\$M
     fi
-done < <(stdbuf -oL evtest "\$EV" 2>/dev/null)
+    LAST_PCT=\$1
+    OWN_T=\${EPOCHREALTIME/[.,]/}
+}
+
+restore_saved() {
+    [ -s "\$SAVE" ] || return
+    local R=\$(head -n1 "\$SAVE")
+    rm -f "\$SAVE"
+    [[ "\$R" =~ ^[0-9]+\$ ]] && [ "\$R" -le "\$MAX_VOL" ] || return
+    set_hw "\$R"
+    LAST_RAW=\$R
+}
+
+on_connect() {
+    local CUR=\$(get_hw)
+    local CAP=\$(( MAX_VOL * CAP_PCT / 100 ))
+    MUTED=""
+    if ! [[ "\$CUR" =~ ^[0-9]+\$ ]]; then
+        set_bt "\$CAP_PCT"
+        return
+    fi
+    [ -s "\$SAVE" ] || echo "\$CUR" > "\$SAVE"
+    if [ "\$CUR" -gt "\$CAP" ]; then
+        set_hw "\$CAP"
+        CUR=\$CAP
+    fi
+    LAST_RAW=\$CUR
+    set_bt \$(( (CUR * 100 + MAX_VOL / 2) / MAX_VOL ))
+}
+
+on_disconnect() {
+    BT_SINK=""
+    LAST_PCT=""
+    MUTED=""
+    restore_saved
+}
+
+restore_saved
+
+while true; do
+    until [ -S $PULSE_SOCKET ] && \$PA info >/dev/null 2>&1; do
+        sleep 1
+    done
+
+    LAST_RAW=\$(get_hw)
+    find_sink
+    [ -n "\$BT_SINK" ] && on_connect
+
+    while read -r line; do
+        case "\$line" in
+            PULSE_GONE)
+                break
+                ;;
+            "Event 'new' on sink #"*)
+                if [ -z "\$BT_SINK" ]; then
+                    find_sink
+                    [ -n "\$BT_SINK" ] && on_connect
+                fi
+                ;;
+            "Event 'remove' on sink #"*)
+                if [ -n "\$BT_SINK" ]; then
+                    find_sink
+                    [ -z "\$BT_SINK" ] && on_disconnect
+                fi
+                ;;
+            "Event 'change' on sink #"*)
+                [ -z "\$BT_SINK" ] && continue
+                (( \${EPOCHREALTIME/[.,]/} - OWN_T < 300000 )) && continue
+                V=\$(get_bt)
+                [[ "\$V" =~ ^[0-9]+\$ ]] || continue
+                [ "\$V" -gt 100 ] && V=100
+                D=\$(( V - \${LAST_PCT:-0} ))
+                [ "\${D#-}" -le 1 ] && continue
+                RAW=\$(( (V * MAX_VOL + 50) / 100 ))
+                set_hw "\$RAW"
+                LAST_RAW=\$RAW
+                LAST_PCT=\$V
+                ;;
+            "Event "*)
+                ;;
+            *)
+                RAW=\$(get_hw)
+                [[ "\$RAW" =~ ^[0-9]+\$ ]] || continue
+                [ "\$RAW" = "\$LAST_RAW" ] && continue
+                LAST_RAW=\$RAW
+                [ -z "\$BT_SINK" ] && continue
+                PCT=\$(( (RAW * 100 + MAX_VOL / 2) / MAX_VOL ))
+                [ "\$PCT" = "\$LAST_PCT" ] || set_bt "\$PCT"
+                ;;
+        esac
+    done < <(stdbuf -oL alsactl monitor 2>/dev/null & A=\$!; stdbuf -oL \$PA subscribe 2>/dev/null; echo PULSE_GONE; kill \$A 2>/dev/null)
+
+    [ -n "\$BT_SINK" ] && on_disconnect
+    sleep 1
+done
 EOF
     sudo chmod +x /usr/local/bin/bt-volume-monitor.sh
 }
@@ -1302,7 +1375,7 @@ while true; do
         sleep 0.5
         \$PA set-default-sink ${INTERNAL_SINK_NAME} 2>/dev/null
         \$PA set-sink-mute ${INTERNAL_SINK_NAME} 0 2>/dev/null
-        \$PA set-sink-volume ${INTERNAL_SINK_NAME} 65% 2>/dev/null
+        \$PA set-sink-volume ${INTERNAL_SINK_NAME} 100% 2>/dev/null
         for stream in \$(\$PA list short sink-inputs 2>/dev/null | awk '{print \$1}'); do
             \$PA move-sink-input "\$stream" ${INTERNAL_SINK_NAME} 2>/dev/null
         done
@@ -1339,6 +1412,20 @@ EOF
     done
     
     Fix_Volume_Script
+
+    # --- Saved speaker level lives here while a BT device is connected ---
+    sudo mkdir -p /var/cache/bt-manager
+    sudo chown ark:ark /var/cache/bt-manager
+
+    # --- Pin the ES volume control to the hardware mixer ---
+    if [ -f "$ES_CONF" ]; then
+        if grep -q '<string name="AudioCard"' "$ES_CONF"; then
+            sed -i 's|<string name="AudioCard" value="[^"]*" />|<string name="AudioCard" value="hw:0" />|' "$ES_CONF"
+        else
+            sed -i '0,/<bool name=/s//<string name="AudioCard" value="hw:0" \/>\n<bool name=/' "$ES_CONF"
+        fi
+        chown ark:ark "$ES_CONF"
+    fi
 
 	grep -q "PULSE_SERVER" /etc/environment 2>/dev/null || \
 		echo "PULSE_SERVER=unix:${PULSE_SOCKET}" >> /etc/environment
@@ -1482,6 +1569,7 @@ Ensure_Permissions() {
 		[[ "$(uname -r)" == 4.* ]] && Install_Drivers
         Fix_Bluetooth_Config
         touch "$INSTALLED_FLAG"
+        restart_ES="1"
         if dialog \
 				--backtitle "$T_BACKTITLE" \
 				--title "$T_REBOOT_TITLE" \
@@ -1551,8 +1639,6 @@ Apply_Audio_Fix() {
 
         CARD=$($PA_CMD list short cards 2>/dev/null | grep "bluez_card" | awk '{print $2}')
 
-        $PA_CMD set-sink-volume "$BT_SINK" 60% >/dev/null 2>&1
-
 		# Route ALSA through PulseAudio so SDL2/RetroArch audio goes to BT
         Set_Asound_Pulse
     else
@@ -1576,7 +1662,7 @@ Force_Internal_Audio() {
 
     $PA_CMD set-default-sink $(Get_Internal_Sink) >/dev/null 2>&1
     $PA_CMD set-sink-mute $(Get_Internal_Sink) 0 >/dev/null 2>&1
-    $PA_CMD set-sink-volume $(Get_Internal_Sink) 65% >/dev/null 2>&1
+    $PA_CMD set-sink-volume $(Get_Internal_Sink) 100% >/dev/null 2>&1
 
     # --- Restore ALSA direct routing ---
     Set_Asound_Direct
@@ -2264,6 +2350,13 @@ Run_Uninstall() {
 	rm -rf /home/ark/.config/pulse/ 2>/dev/null || true
 	rm -rf /run/user/${ARK_UID}/pulse/ 2>/dev/null || true
 	cp /home/ark/.asoundrcbak /home/ark/.asoundrc 2>/dev/null || true
+	[ -s /var/cache/bt-manager/speaker_volume ] && amixer -c 0 -q sset Playback "$(head -n1 /var/cache/bt-manager/speaker_volume)" >/dev/null 2>&1
+	rm -rf /var/cache/bt-manager 2>/dev/null || true
+	if [ -f "$ES_CONF" ]; then
+		sed -i '/<string name="AudioCard" value="hw:0" \/>/d' "$ES_CONF"
+		chown ark:ark "$ES_CONF"
+		restart_ES="1"
+	fi
 	sed -i '/autospawn = yes/d' /etc/pulse/client.conf 2>/dev/null || true
 	sed -i '/PULSE_SERVER/d' /etc/environment 2>/dev/null || true
 	sed -i '/XDG_RUNTIME_DIR/d' /etc/environment 2>/dev/null || true
